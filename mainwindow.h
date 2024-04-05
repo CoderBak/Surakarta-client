@@ -1,28 +1,28 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QTcpSocket>
+#include <QPushButton>
 
-namespace Ui { class MainWindow; }
+namespace Ui {
+    class MainWindow;
+}
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
 Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-
     ~MainWindow() override;
 
 private slots:
-
-    void on_pushButton_clicked();
-
-    void readData();
+    void sendData();
 
 private:
     Ui::MainWindow *ui;
     QTcpSocket *socket;
 };
 
-#endif // CLIENT_H
+#endif //MAINWINDOW_H

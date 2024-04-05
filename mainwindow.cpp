@@ -2,10 +2,13 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 
-MainWindow::MainWindow(QWidget *parent)
-        : QMainWindow(parent), ui(new Ui::MainWindow), socket(new QTcpSocket(this)) {
+MainWindow::MainWindow(QWidget *parent) :
+        QMainWindow(parent),
+        ui(new Ui::MainWindow),
+        socket(new QTcpSocket(this))
+{
     ui->setupUi(this);
-    connect(socket, &QTcpSocket::readyRead, this, &MainWindow::readData);
+    //connect(socket, &QTcpSocket::readyRead, this, &MainWindow::sendData);
     socket->connectToHost("localhost", 1234);
     if (!socket->waitForConnected()) {
         qDebug() << "Failed to connect to host.";
@@ -13,19 +16,18 @@ MainWindow::MainWindow(QWidget *parent)
     } else {
         qDebug() << "Connected successfully!";
     }
+    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::sendData);
 }
 
-MainWindow::~MainWindow() {
+MainWindow::~MainWindow()
+{
     delete ui;
 }
 
-void MainWindow::on_pushButton_clicked() {
-    QString number = ui->lineEdit->text();
-    qDebug() << number;
-    socket->write(number.toUtf8());
-}
-
-void MainWindow::readData() {
-    QByteArray data = socket->readAll();
-    ui->label->setText(data);
+void MainWindow::sendData() {
+    QByteArray data;
+    data.append(ui->lineEdit1->text().toUtf8());
+    data.append(" ");
+    data.append(ui->lineEdit2->text().toUtf8());
+    socket->write(data);
 }

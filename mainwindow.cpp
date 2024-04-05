@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     socket->connectToHost("localhost", 1234);
     if (!socket->waitForConnected()) {
         qDebug() << "Failed to connect to host.";
-        exit(1);
+        exit(-1);
     } else {
         qDebug() << "Connected successfully!";
     }
@@ -27,7 +27,7 @@ MainWindow::~MainWindow()
 void MainWindow::sendData() {
     QByteArray data;
     data.append(ui->lineEdit1->text().toUtf8());
-    data.append(" ");
+    data.append(";");
     data.append(ui->lineEdit2->text().toUtf8());
     socket->write(data);
 }

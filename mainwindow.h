@@ -19,6 +19,7 @@ public:
 
 private slots:
     void sendData();
+    void getData();
 
 private:
     Ui::MainWindow *ui;

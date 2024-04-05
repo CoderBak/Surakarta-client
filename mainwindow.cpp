@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
         socket(new QTcpSocket(this))
 {
     ui->setupUi(this);
-    //connect(socket, &QTcpSocket::readyRead, this, &MainWindow::sendData);
+    connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
     socket->connectToHost("localhost", 1234);
     if (!socket->waitForConnected()) {
         qDebug() << "Failed to connect to host.";
@@ -30,4 +30,10 @@ void MainWindow::sendData() {
     data.append(";");
     data.append(ui->lineEdit2->text().toUtf8());
     socket->write(data);
+}
+
+void MainWindow::getData() {
+    QByteArray data = socket->readAll();
+    qDebug() << "Received message from server: " << data;
+    socket->read(socket->bytesAvailable());
 }

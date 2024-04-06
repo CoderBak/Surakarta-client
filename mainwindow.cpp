@@ -25,7 +25,9 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::sendData() {
+    // When perform move, the info format is : M4;5;3;4
     QByteArray data;
+    data.append("M");
     data.append(ui->lineEdit1->text().toUtf8());
     data.append(";");
     data.append(ui->lineEdit2->text().toUtf8());

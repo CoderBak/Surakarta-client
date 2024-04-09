@@ -1,13 +1,34 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "qtboard.h"
 #include <QDebug>
-
+#include <Qpainter>
+#include <QMouseEvent>
+#include<iostream>
+#include<sstream>
+#include<QTextStream>
+#include<QString>
+QtBoard::QtBoard(QWidget *parent):QWidget(parent){}
+QtBoard::~QtBoard(){
+}
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
-        socket(new QTcpSocket(this))
+        socket(new QTcpSocket(this)),
+        board(new QtBoard(this))
 {
     ui->setupUi(this);
+    //setCentralWidget(board);
+    setFixedSize(800,600);
+    QVBoxLayout *layout = new QVBoxLayout;
+        layout->addWidget(board);
+        layout->addWidget(ui->pushButton);
+        layout->addWidget(ui->lineEdit1);
+        layout->addWidget(ui->lineEdit2);
+
+        QWidget *centralWidget = new QWidget;
+        centralWidget->setLayout(layout);
+        setCentralWidget(centralWidget);
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
     socket->connectToHost("localhost", 1234);
     if (!socket->waitForConnected()) {
@@ -37,5 +58,117 @@ void MainWindow::sendData() {
 void MainWindow::getData() {
     QByteArray data = socket->readAll();
     qDebug() << "Received message from server: " << data;
+     board->processBoardInfo(data);
     socket->read(socket->bytesAvailable());
+}
+
+
+void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
+    // 将字节数组转换为字符串
+    QString boardInfoStr = QString::fromUtf8(boardInfo);
+
+    // 去除字符串两端的空白字符和引号
+    QString sanitizedInfo = boardInfoStr.trimmed();
+    sanitizedInfo.remove("\"");
+
+    // 分割字符串为行
+    QStringList rows = sanitizedInfo.split('\n');
+
+    // 遍历每一行数据
+    for (int row = 0; row < 6; ++row) {
+        QString rowString = rows.value(row).trimmed();
+
+        // 遍历每一列数据
+        for (int col = 0; col < 6; ++col) {
+            QChar pieceChar = rowString.at(col);
+            switch (pieceChar.toLatin1()) {
+                case 'B':
+                    chessColor[col][row] = BLACK;
+                    break;
+                case 'W':
+                    chessColor[col][row] = WHITE;
+                    break;
+                case '.':
+                    chessColor[col][row] = NONE;
+                    break;
+                default:
+                    qDebug() << "Error: Invalid piece character!";
+            }
+        }
+    }
+
+    // 打印二维数组，以便调试
+    for (int row = 0; row < 6; ++row) {
+        for (int col = 0; col < 6; ++col) {
+            std::cout << (chessColor[col][row] == BLACK ? "B" : (chessColor[col][row] == WHITE ? "W" : "."));
+        }
+        std::cout << std::endl;
+    }
+
+    // 重新绘制棋盘
+    repaint();
+}
+
+void QtBoard::paintEvent(QPaintEvent *){
+    QPainter painter(this);
+
+    int dir_x[4]={0*16,90*16,270*16,180*16};
+    for(int i=0;i<6;i++){
+        painter.drawLine(QPoint(x,i*d*k+y),QPoint(x+5*d*k,i*d*k+y));
+    }
+    for(int i=0;i<6;i++){
+        painter.drawLine(QPoint(x+i*d*k,y),QPoint(x+i*d*k,5*d*k+y));
+    }
+    for(int i=0;i<2;i++){
+        for(int j=0;j<2;j++){
+            int m=x+i*5*d*k;
+            int n=y+j*5*d*k;
+            painter.drawArc(m-d*k,n-d*k,d*2*k,d*2*k,dir_x[i*2+j],270*16);
+            painter.drawArc(m-2*d*k,n-2*d*k,d*4*k,d*4*k,dir_x[i*2+j],270*16);
+        }
+    }
+    if(turn++==0)
+    InitBoard();
+    drawChess();
+}
+
+void QtBoard::InitBoard(){
+   for(int i=0;i<6;i++){
+       for(int j=0;j<6;j++){
+           if(i<2)
+           chessColor[j][i]=BLACK;
+           else if(i>3)
+           chessColor[j][i]=WHITE;
+           else
+           chessColor[j][i]=NONE;
+
+       }
+   }
+}
+void QtBoard::drawChess(){
+    QPainter painter(this);
+
+    for(int i=0;i<6;i++){
+        for(int j=0;j<6;j++){
+            if(chessColor[i][j]==BLACK){
+                 painter.setBrush(QBrush(Qt::black,Qt::SolidPattern));
+                 painter.drawEllipse(x+i*d*k-d/2,y+j*d*k-d/2,d,d);
+            }
+            else if(chessColor[i][j]==WHITE){
+                painter.setBrush(QBrush(Qt::white,Qt::SolidPattern));
+                painter.drawEllipse(x+i*d*k-d/2,y+j*d*k-d/2,d,d);
+            }
+        }
+    }
+}
+void QtBoard::mousePressEvent(QMouseEvent* event){
+    if(event->button()==Qt::LeftButton){
+        int row=(event->y()-y)/(d*k);
+        int col=(event->x()-x)/(d*k);
+        if(row>=0&&row<=5&&col>=0&&col<=5){
+
+        }
+    }
+
+
 }

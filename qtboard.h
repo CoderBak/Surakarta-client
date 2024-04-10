@@ -19,6 +19,8 @@ class QtBoard: public QWidget
     void InitBoard();
     void processBoardInfo(const QByteArray &boardInfo);
     void drawChess();
+    bool eventFilter(QObject *obj, QEvent *event) override;
+    ChessColor checkTurn();
 signals:
     void moveInfoReady(const QString &moveInfo);
  private:
@@ -27,10 +29,13 @@ signals:
     int x=280;//增大整个图形向右动
     int y=120;//增大整个图形向下动
     int turn=0;
+    int begin=0;
     double k=(double)10/9;
     //注意，保证了棋盘间距比棋子略大
-    int selectedPieceRow;
-    int selectedPieceCol;
+    int selectedPieceRow=-1;
+    int selectedPieceCol=-1;
+    int borderSize=2;
+    int borderWidth=5;
     QPoint stPos,edPos;
 private slots:
 

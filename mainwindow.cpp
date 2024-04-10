@@ -8,8 +8,28 @@
 #include<sstream>
 #include<QTextStream>
 #include<QString>
-QtBoard::QtBoard(QWidget *parent):QWidget(parent){}
+#include<QCursor>
+// #include<QSoundEffect>
+QtBoard::QtBoard(QWidget *parent):QWidget(parent){
+    this->installEventFilter(this);
+}
 QtBoard::~QtBoard(){
+}
+bool QtBoard::eventFilter(QObject *obj, QEvent *event){
+    if (event->type() == QEvent::MouseButtonPress) {
+           QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+           if (mouseEvent->button() == Qt::LeftButton) {
+               // 在此处更改鼠标指针形状
+               QCursor cursor(Qt::PointingHandCursor); // 更改为您希望的指针形状
+               setCursor(cursor);
+           }
+       }
+       // 将事件传递给父类
+       return QWidget::eventFilter(obj, event);
+}
+ChessColor QtBoard::checkTurn(){
+    if(turn%2==0)return BLACK;
+    else return WHITE;
 }
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
@@ -22,9 +42,13 @@ MainWindow::MainWindow(QWidget *parent) :
     setFixedSize(800,600);
     QVBoxLayout *layout = new QVBoxLayout;
         layout->addWidget(board);
-        layout->addWidget(ui->pushButton);
-        layout->addWidget(ui->lineEdit1);
-        layout->addWidget(ui->lineEdit2);
+        QPushButton *tryAgainButton = new QPushButton("Try Again", this);
+        QPushButton *giveUpButton = new QPushButton("Give Up", this);
+        QPushButton *openChatroomButton = new QPushButton("Open Chatroom", this);
+
+        layout->addWidget(tryAgainButton);
+        layout->addWidget(giveUpButton);
+        layout->addWidget(openChatroomButton);
 
         QWidget *centralWidget = new QWidget;
         centralWidget->setLayout(layout);
@@ -32,6 +56,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(board,&QtBoard::moveInfoReady,this,&MainWindow::sendData);
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
+  //  connect(tryAgainButton, &QPushButton::clicked, this, &MainWindow::handleTryAgain);
+  //  connect(giveUpButton, &QPushButton::clicked, this, &MainWindow::handleGiveUp);
+   // connect(openChatroomButton, &QPushButton::clicked, this, &MainWindow::handleOpenChatroom);
     socket->connectToHost("localhost", 1234);
     if (!socket->waitForConnected()) {
         qDebug() << "Failed to connect to host.";
@@ -181,10 +208,23 @@ void QtBoard::paintEvent(QPaintEvent *){
             painter.drawArc(m-2*d*k,n-2*d*k,d*4*k,d*4*k,dir_x[i*2+j],270*16);
         }
     }
-    if(turn++==0)
+    //最开始初始页面
+    if(begin++==0)
     InitBoard();
+    //点击后提供特效
+    if (selectedPieceRow != -1 && selectedPieceCol != -1) {
+           int centerX = stPos.x() + selectedPieceCol * d * k+x;
+           int centerY = stPos.y() + selectedPieceRow * d * k+y;
 
-    drawChess();
+           // 计算边框矩形的位置
+           QRect borderRect(centerX - d / 2 - borderSize, centerY - d / 2 - borderSize, d + 2 * borderSize, d + 2 * borderSize);
+
+           // 绘制半透明边框
+           painter.setPen(QPen(Qt::red, borderWidth)); // 设置边框颜色和宽度
+           painter.setBrush(Qt::NoBrush); // 不填充颜色，保持边框透明
+           painter.drawEllipse(borderRect);
+       }
+           drawChess();
 }
 
 void QtBoard::InitBoard(){
@@ -229,6 +269,8 @@ void QtBoard::mousePressEvent(QMouseEvent* event){
                 // 存储点击的棋子位置
                 selectedPieceRow = row;
                 selectedPieceCol = col;
+                repaint();
+
             } else {
                 // 如果已经选择了棋子，则发送移动信息
                 if(selectedPieceRow != -1 && selectedPieceCol != -1){
@@ -242,6 +284,7 @@ void QtBoard::mousePressEvent(QMouseEvent* event){
                     //socket->write(data);
                   std::cout<<selectedPieceRow<<","<<selectedPieceCol<<";"<<row<<","<<col<<std::endl;
                     emit moveInfoReady(moveInfo);
+
                     // 清除已选择的棋子位置
                     selectedPieceRow = -1;
                     selectedPieceCol = -1;

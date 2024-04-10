@@ -21,6 +21,9 @@ public:
 private slots:
     void sendData(const QString&moveInfo);
     void getData();
+   // void handleTryAgain();
+   // void handleGiveUp();
+   // void handleOpenChatroom();
 
 private:
     Ui::MainWindow *ui;

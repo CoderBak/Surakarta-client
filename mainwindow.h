@@ -1,6 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#include"qtboard.h"
+
 #include <QMainWindow>
 #include <QTcpSocket>
 #include <QPushButton>
@@ -8,7 +8,6 @@
 namespace Ui {
     class MainWindow;
 }
-
 
 class MainWindow : public QMainWindow
 {
@@ -19,7 +18,7 @@ public:
     ~MainWindow() override;
 
 private slots:
-    void sendData(const QString&moveInfo);
+    void sendData();
     void getData();
    // void handleTryAgain();
    // void handleGiveUp();
@@ -28,10 +27,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QTcpSocket *socket;
-    QtBoard *board;
 };
-
-
-
 
 #endif //MAINWINDOW_H

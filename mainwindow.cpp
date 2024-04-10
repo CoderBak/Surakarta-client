@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
         QWidget *centralWidget = new QWidget;
         centralWidget->setLayout(layout);
         setCentralWidget(centralWidget);
+
+    connect(board,&QtBoard::moveInfoReady,this,&MainWindow::sendData);
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
     socket->connectToHost("localhost", 1234);
     if (!socket->waitForConnected()) {
@@ -37,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
         qDebug() << "Connected successfully!";
     }
-    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::sendData);
+   // connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::sendData);
 }
 
 MainWindow::~MainWindow()
@@ -45,13 +47,14 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::sendData() {
+void MainWindow::sendData(const QString&moveInfo) {
     // When perform move, the info format is : M4;5;3;4
     QByteArray data;
-    data.append("M");
-    data.append(ui->lineEdit1->text().toUtf8());
-    data.append(";");
-    data.append(ui->lineEdit2->text().toUtf8());
+   // data.append("M");
+   // data.append(ui->lineEdit1->text().toUtf8());
+   // data.append(";");
+   // data.append(ui->lineEdit2->text().toUtf8());
+    data.append(moveInfo.toUtf8());
     socket->write(data);
 }
 
@@ -61,7 +64,6 @@ void MainWindow::getData() {
      board->processBoardInfo(data);
     socket->read(socket->bytesAvailable());
 }
-
 
 void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
     // 将字节数组转换为字符串
@@ -77,10 +79,11 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
     // 遍历每一行数据
     for (int row = 0; row < 6; ++row) {
         QString rowString = rows.value(row).trimmed();
-
+    qDebug()<<rows.value(row).trimmed();
         // 遍历每一列数据
         for (int col = 0; col < 6; ++col) {
             QChar pieceChar = rowString.at(col);
+            qDebug()<<pieceChar.toLatin1();
             switch (pieceChar.toLatin1()) {
                 case 'B':
                     chessColor[col][row] = BLACK;
@@ -92,7 +95,9 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
                     chessColor[col][row] = NONE;
                     break;
                 default:
-                    qDebug() << "Error: Invalid piece character!";
+                   // qDebug() << "Error: Invalid piece character!";
+               // qDebug()<<pieceChar.toLatin1();
+                break;
             }
         }
     }
@@ -102,12 +107,13 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
         for (int col = 0; col < 6; ++col) {
             std::cout << (chessColor[col][row] == BLACK ? "B" : (chessColor[col][row] == WHITE ? "W" : "."));
         }
-        std::cout << std::endl;
-    }
+     std::cout << std::endl;
+   }
 
     // 重新绘制棋盘
     repaint();
 }
+
 
 void QtBoard::paintEvent(QPaintEvent *){
     QPainter painter(this);
@@ -129,6 +135,7 @@ void QtBoard::paintEvent(QPaintEvent *){
     }
     if(turn++==0)
     InitBoard();
+
     drawChess();
 }
 
@@ -162,13 +169,37 @@ void QtBoard::drawChess(){
     }
 }
 void QtBoard::mousePressEvent(QMouseEvent* event){
-    if(event->button()==Qt::LeftButton){
-        int row=(event->y()-y)/(d*k);
-        int col=(event->x()-x)/(d*k);
-        if(row>=0&&row<=5&&col>=0&&col<=5){
-
+    event->pos();
+    if(event->button() == Qt::LeftButton){
+        int row = (event->y() - stPos.y()+0.5*d-y) / (d * k);
+        int col = (event->x() - stPos.x()+0.5*d-x) / (d * k);
+        std::cout<<row<<","<<col<<std::endl;
+        // 检查点击的位置是否在棋盘范围内
+        if(row >= 0 && row < 6 && col >= 0 && col < 6){
+            // 检查点击的位置是否有棋子
+            if(chessColor[col][row] != NONE){
+                // 存储点击的棋子位置
+                selectedPieceRow = row;
+                selectedPieceCol = col;
+            } else {
+                // 如果已经选择了棋子，则发送移动信息
+                if(selectedPieceRow != -1 && selectedPieceCol != -1){
+                    // 发送移动信息给服务器
+                    QString moveInfo = QString("M%1;%2;%3;%4")
+                                            .arg(selectedPieceCol)
+                                            .arg(selectedPieceRow)
+                                            .arg(col)
+                                            .arg(row);
+                    //QByteArray data = moveInfo.toUtf8();
+                    //socket->write(data);
+                  std::cout<<selectedPieceRow<<","<<selectedPieceCol<<";"<<row<<","<<col<<std::endl;
+                    emit moveInfoReady(moveInfo);
+                    // 清除已选择的棋子位置
+                    selectedPieceRow = -1;
+                    selectedPieceCol = -1;
+                }
+            }
         }
     }
-
-
 }
+

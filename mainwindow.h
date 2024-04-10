@@ -19,7 +19,7 @@ public:
     ~MainWindow() override;
 
 private slots:
-    void sendData();
+    void sendData(const QString&moveInfo);
     void getData();
 
 private:

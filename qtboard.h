@@ -19,7 +19,8 @@ class QtBoard: public QWidget
     void InitBoard();
     void processBoardInfo(const QByteArray &boardInfo);
     void drawChess();
-
+signals:
+    void moveInfoReady(const QString &moveInfo);
  private:
     ChessColor chessColor[6][6];
     int d=40;//棋子直径 or 9/10の棋盘直径
@@ -28,6 +29,8 @@ class QtBoard: public QWidget
     int turn=0;
     double k=(double)10/9;
     //注意，保证了棋盘间距比棋子略大
+    int selectedPieceRow;
+    int selectedPieceCol;
     QPoint stPos,edPos;
 private slots:
 

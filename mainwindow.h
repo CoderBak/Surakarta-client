@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QTcpSocket>
 #include <QPushButton>
-
+#include "qtboard.h"
 namespace Ui {
     class MainWindow;
 }
@@ -18,7 +18,7 @@ public:
     ~MainWindow() override;
 
 private slots:
-    void sendData();
+    void sendData(const QString&);
     void getData();
    // void handleTryAgain();
    // void handleGiveUp();
@@ -27,6 +27,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QTcpSocket *socket;
+    QtBoard *board;
 };
 
 #endif //MAINWINDOW_H

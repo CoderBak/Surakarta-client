@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "qtboard.h"
 #include <QDebug>
-<<<<<<< HEAD
 #include <Qpainter>
 #include <QMouseEvent>
 #include<iostream>
@@ -31,18 +31,15 @@ ChessColor QtBoard::checkTurn(){
     if(turn%2==0)return BLACK;
     else return WHITE;
 }
-=======
-
->>>>>>> a1e8519d8ffa131e5e3542ef31a0c239707fe97a
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
-        socket(new QTcpSocket(this))
+        socket(new QTcpSocket(this)),
+        board(new QtBoard(this))
 {
     ui->setupUi(this);
-<<<<<<< HEAD
     //setCentralWidget(board);
-    setFixedSize(800,600);
+    setFixedSize(1000,800);
     QVBoxLayout *layout = new QVBoxLayout;
         layout->addWidget(board);
         QPushButton *tryAgainButton = new QPushButton("Try Again", this);
@@ -58,8 +55,6 @@ MainWindow::MainWindow(QWidget *parent) :
         setCentralWidget(centralWidget);
 
     connect(board,&QtBoard::moveInfoReady,this,&MainWindow::sendData);
-=======
->>>>>>> a1e8519d8ffa131e5e3542ef31a0c239707fe97a
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
   //  connect(tryAgainButton, &QPushButton::clicked, this, &MainWindow::handleTryAgain);
   //  connect(giveUpButton, &QPushButton::clicked, this, &MainWindow::handleGiveUp);
@@ -71,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
         qDebug() << "Connected successfully!";
     }
-    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::sendData);
+   // connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::sendData);
 }
 
 MainWindow::~MainWindow()
@@ -79,21 +74,22 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::sendData() {
+void MainWindow::sendData(const QString&moveInfo) {
     // When perform move, the info format is : M4;5;3;4
     QByteArray data;
-    data.append("M");
-    data.append(ui->lineEdit1->text().toUtf8());
-    data.append(";");
-    data.append(ui->lineEdit2->text().toUtf8());
+   // data.append("M");
+   // data.append(ui->lineEdit1->text().toUtf8());
+   // data.append(";");
+   // data.append(ui->lineEdit2->text().toUtf8());
+    data.append(moveInfo.toUtf8());
     socket->write(data);
 }
 
 void MainWindow::getData() {
     QByteArray data = socket->readAll();
     qDebug() << "Received message from server: " << data;
+     board->processBoardInfo(data);
     socket->read(socket->bytesAvailable());
-<<<<<<< HEAD
 }
 
 // void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
@@ -298,6 +294,3 @@ void QtBoard::mousePressEvent(QMouseEvent* event){
     }
 }
 
-=======
-}
->>>>>>> a1e8519d8ffa131e5e3542ef31a0c239707fe97a

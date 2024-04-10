@@ -25,9 +25,9 @@ signals:
     void moveInfoReady(const QString &moveInfo);
  private:
     ChessColor chessColor[6][6];
-    int d=40;//棋子直径 or 9/10の棋盘直径
+    int d=60;//棋子直径 or 9/10の棋盘直径
     int x=280;//增大整个图形向右动
-    int y=120;//增大整个图形向下动
+    int y=140;//增大整个图形向下动
     int turn=0;
     int begin=0;
     double k=(double)10/9;

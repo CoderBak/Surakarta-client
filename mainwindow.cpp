@@ -65,50 +65,98 @@ void MainWindow::getData() {
     socket->read(socket->bytesAvailable());
 }
 
+// void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
+//     // 将字节数组转换为字符串
+//     QString boardInfoStr = QString::fromUtf8(boardInfo);
+
+//     // 去除字符串两端的空白字符和引号
+//     QString sanitizedInfo = boardInfoStr.trimmed();
+//     sanitizedInfo.remove("\"");
+
+//     // 分割字符串为行
+//     QStringList rows = sanitizedInfo.split('\n');
+
+//     // 遍历每一行数据
+//     for (int row = 0; row < 6; ++row) {
+//         QString rowString = rows.value(row).trimmed();
+//     qDebug()<<rows.value(row).trimmed();
+//         // 遍历每一列数据
+//         for (int col = 0; col < 6; ++col) {
+//             QChar pieceChar = rowString.at(col);
+//             qDebug()<<pieceChar.toLatin1();
+//             switch (pieceChar.toLatin1()) {
+//                 case 'B':
+//                     chessColor[col][row] = BLACK;
+//                     break;
+//                 case 'W':
+//                     chessColor[col][row] = WHITE;
+//                     break;
+//                 case '.':
+//                     chessColor[col][row] = NONE;
+//                     break;
+//                 default:
+//                    // qDebug() << "Error: Invalid piece character!";
+//                // qDebug()<<pieceChar.toLatin1();
+//                 break;
+//             }
+//         }
+//     }
+
+//     // 打印二维数组，以便调试
+//     for (int row = 0; row < 6; ++row) {
+//         for (int col = 0; col < 6; ++col) {
+//             std::cout << (chessColor[col][row] == BLACK ? "B" : (chessColor[col][row] == WHITE ? "W" : "."));
+//         }
+//      std::cout << std::endl;
+//    }
+
+//     // 重新绘制棋盘
+//     repaint();
+// }
+
 void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
     // 将字节数组转换为字符串
     QString boardInfoStr = QString::fromUtf8(boardInfo);
 
-    // 去除字符串两端的空白字符和引号
-    QString sanitizedInfo = boardInfoStr.trimmed();
-    sanitizedInfo.remove("\"");
-
     // 分割字符串为行
-    QStringList rows = sanitizedInfo.split('\n');
+    QStringList rows = boardInfoStr.split('\n');
 
     // 遍历每一行数据
     for (int row = 0; row < 6; ++row) {
         QString rowString = rows.value(row).trimmed();
-    qDebug()<<rows.value(row).trimmed();
-        // 遍历每一列数据
+        rowString.remove(' ');
+        // 使用输入输出流读取数据并存储到二维数组中
+        QTextStream stream(&rowString);
         for (int col = 0; col < 6; ++col) {
-            QChar pieceChar = rowString.at(col);
-            qDebug()<<pieceChar.toLatin1();
-            switch (pieceChar.toLatin1()) {
-                case 'B':
-                    chessColor[col][row] = BLACK;
-                    break;
-                case 'W':
-                    chessColor[col][row] = WHITE;
-                    break;
-                case '.':
-                    chessColor[col][row] = NONE;
-                    break;
-                default:
-                   // qDebug() << "Error: Invalid piece character!";
-               // qDebug()<<pieceChar.toLatin1();
-                break;
+            QChar pieceChar;
+            stream >> pieceChar;
+            qDebug()<<pieceChar;
+            char piece = pieceChar.toLatin1();
+           std:: cout<<"attention:"<<piece<<std::endl;
+            // 检查当前字符是否是需要的字符类型，如果不是则跳过
+            if (piece == 'B' || piece == 'W' || piece == '.') {
+                switch (piece) {
+                    case 'B':
+                        chessColor[row][col] = BLACK;
+                        break;
+                    case 'W':
+                        chessColor[row][col] = WHITE;
+                        break;
+                    case '.':
+                        chessColor[row][col] = NONE;
+                        break;
+                }
             }
         }
     }
 
     // 打印二维数组，以便调试
-    for (int row = 0; row < 6; ++row) {
-        for (int col = 0; col < 6; ++col) {
-            std::cout << (chessColor[col][row] == BLACK ? "B" : (chessColor[col][row] == WHITE ? "W" : "."));
-        }
-     std::cout << std::endl;
-   }
+    // for (int row = 0; row < 6; ++row) {
+    //     for (int col = 0; col < 6; ++col) {
+    //         std::cout << (chessColor[row][col] == BLACK ? "B" : (chessColor[row][col] == WHITE ? "W" : "."));
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     // 重新绘制棋盘
     repaint();
@@ -143,11 +191,11 @@ void QtBoard::InitBoard(){
    for(int i=0;i<6;i++){
        for(int j=0;j<6;j++){
            if(i<2)
-           chessColor[j][i]=BLACK;
+           chessColor[i][j]=BLACK;
            else if(i>3)
-           chessColor[j][i]=WHITE;
+           chessColor[i][j]=WHITE;
            else
-           chessColor[j][i]=NONE;
+           chessColor[i][j]=NONE;
 
        }
    }
@@ -159,11 +207,11 @@ void QtBoard::drawChess(){
         for(int j=0;j<6;j++){
             if(chessColor[i][j]==BLACK){
                  painter.setBrush(QBrush(Qt::black,Qt::SolidPattern));
-                 painter.drawEllipse(x+i*d*k-d/2,y+j*d*k-d/2,d,d);
+                 painter.drawEllipse(x+j*d*k-d/2,y+i*d*k-d/2,d,d);
             }
             else if(chessColor[i][j]==WHITE){
                 painter.setBrush(QBrush(Qt::white,Qt::SolidPattern));
-                painter.drawEllipse(x+i*d*k-d/2,y+j*d*k-d/2,d,d);
+                painter.drawEllipse(x+j*d*k-d/2,y+i*d*k-d/2,d,d);
             }
         }
     }
@@ -177,7 +225,7 @@ void QtBoard::mousePressEvent(QMouseEvent* event){
         // 检查点击的位置是否在棋盘范围内
         if(row >= 0 && row < 6 && col >= 0 && col < 6){
             // 检查点击的位置是否有棋子
-            if(chessColor[col][row] != NONE){
+            if(chessColor[row][col] != NONE){
                 // 存储点击的棋子位置
                 selectedPieceRow = row;
                 selectedPieceCol = col;

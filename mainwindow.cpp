@@ -42,19 +42,27 @@ MainWindow::MainWindow(QWidget *parent) :
     setFixedSize(1000,800);
     QVBoxLayout *layout = new QVBoxLayout;
         layout->addWidget(board);
-        QPushButton *tryAgainButton = new QPushButton("Try Again", this);
-        QPushButton *giveUpButton = new QPushButton("Give Up", this);
-        QPushButton *openChatroomButton = new QPushButton("Open Chatroom", this);
+    // 创建三个按钮
+       QPushButton *tryAgainButton = new QPushButton("Try Again", this);
+       QPushButton *giveUpButton = new QPushButton("Give Up", this);
+       QPushButton *openChatroomButton = new QPushButton("Open Chatroom", this);
 
-        layout->addWidget(tryAgainButton);
-        layout->addWidget(giveUpButton);
-        layout->addWidget(openChatroomButton);
+       // 添加三个按钮到布局中
+       layout->addWidget(tryAgainButton);
+       layout->addWidget(giveUpButton);
+       layout->addWidget(openChatroomButton);
 
-        QWidget *centralWidget = new QWidget;
-        centralWidget->setLayout(layout);
-        setCentralWidget(centralWidget);
+       // 添加编辑框和发送按钮到布局中
+       layout->addWidget(ui->lineEdit1);
+       layout->addWidget(ui->lineEdit2);
+       layout->addWidget(ui->pushButton);
 
-    connect(board,&QtBoard::moveInfoReady,this,&MainWindow::sendData);
+           // 设置布局到中央部件
+           QWidget *centralWidget = new QWidget;
+           centralWidget->setLayout(layout);
+           setCentralWidget(centralWidget);
+
+    connect(board,&QtBoard::moveInfoReady,this,&MainWindow::sendData_mousepress);
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
   //  connect(tryAgainButton, &QPushButton::clicked, this, &MainWindow::handleTryAgain);
   //  connect(giveUpButton, &QPushButton::clicked, this, &MainWindow::handleGiveUp);
@@ -66,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
         qDebug() << "Connected successfully!";
     }
-   // connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::sendData);
+   connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::sendData);
 }
 
 MainWindow::~MainWindow()
@@ -74,7 +82,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::sendData(const QString&moveInfo) {
+void MainWindow::sendData_mousepress(const QString&moveInfo) {
     // When perform move, the info format is : M4;5;3;4
     QByteArray data;
    // data.append("M");
@@ -83,6 +91,14 @@ void MainWindow::sendData(const QString&moveInfo) {
    // data.append(ui->lineEdit2->text().toUtf8());
     data.append(moveInfo.toUtf8());
     socket->write(data);
+}
+void MainWindow::sendData(){
+    QByteArray data;
+     data.append("M");
+     data.append(ui->lineEdit1->text().toUtf8());
+     data.append(";");
+     data.append(ui->lineEdit2->text().toUtf8());
+     socket->write(data);
 }
 
 void MainWindow::getData() {
@@ -192,6 +208,11 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
 
 void QtBoard::paintEvent(QPaintEvent *){
     QPainter painter(this);
+    QPen pen(Qt::black); // 使用黑色笔刷
+    pen.setWidth(3);     // 设置宽度为3个像素
+
+    // 将笔刷应用到绘制器
+    painter.setPen(pen);
 
     int dir_x[4]={0*16,90*16,270*16,180*16};
     for(int i=0;i<6;i++){
@@ -224,6 +245,7 @@ void QtBoard::paintEvent(QPaintEvent *){
            painter.setBrush(Qt::NoBrush); // 不填充颜色，保持边框透明
            painter.drawEllipse(borderRect);
        }
+
            drawChess();
 }
 

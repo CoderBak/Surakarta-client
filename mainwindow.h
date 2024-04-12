@@ -18,7 +18,8 @@ public:
     ~MainWindow() override;
 
 private slots:
-    void sendData(const QString&);
+    void sendData_mousepress(const QString&);
+    void sendData();
     void getData();
    // void handleTryAgain();
    // void handleGiveUp();

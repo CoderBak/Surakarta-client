@@ -31,10 +31,6 @@ bool QtBoard::eventFilter(QObject *obj, QEvent *event) {
     return QWidget::eventFilter(obj, event);
 }
 
-ChessColor QtBoard::checkTurn() {
-    if (turn % 2 == 0) return BLACK;
-    else return WHITE;
-}
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
@@ -43,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
         board(new QtBoard(this)) {
     ui->setupUi(this);
     //setCentralWidget(board);
-    setFixedSize(1000, 800);
+    setFixedSize(1000, 900);
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(board);
     // 创建三个按钮
@@ -209,57 +205,64 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
     repaint();
 }
 
+inline std::pair<int, int> translateIdx(const unsigned int x, const unsigned int y)
+{
+    return std::make_pair(DELTA_X + x * cellSize + cellSize / 2, DELTA_Y + y * cellSize + cellSize / 2);
+}
+
+inline auto drawArcs = [](QPainter &painter, auto centerX, auto centerY, auto startAngle, auto k) {
+    constexpr int endAngle = 270 * 16;
+    painter.setPen(QPen(DEFAULT_COLOR, PEN_WIDTH, Qt::DashLine));
+    for (int i = 1; i <= k; i += 1) {
+        const int radius = i * cellSize;
+        QRectF rect(centerX - radius, centerY - radius, 2 * radius, 2 * radius);
+        painter.drawArc(rect, startAngle, endAngle);
+    }
+    painter.setPen(QPen(DEFAULT_COLOR, PEN_WIDTH));
+};
+
 
 void QtBoard::paintEvent(QPaintEvent *) {
     QPainter painter(this);
-    QPen pen(Qt::black); // 使用黑色笔刷
-    pen.setWidth(3);     // 设置宽度为3个像素
-
-    // 将笔刷应用到绘制器
-    painter.setPen(pen);
-
-    int dir_x[4] = {0 * 16, 90 * 16, 270 * 16, 180 * 16};
-    for (int i = 0; i < 6; i++) {
-        painter.drawLine(QPoint(x, i * d * k + y), QPoint(x + 5 * d * k, i * d * k + y));
-    }
-    for (int i = 0; i < 6; i++) {
-        painter.drawLine(QPoint(x + i * d * k, y), QPoint(x + i * d * k, 5 * d * k + y));
-    }
-    for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < 2; j++) {
-            int m = x + i * 5 * d * k;
-            int n = y + j * 5 * d * k;
-            painter.drawArc(m - d * k, n - d * k, d * 2 * k, d * 2 * k, dir_x[i * 2 + j], 270 * 16);
-            painter.drawArc(m - 2 * d * k, n - 2 * d * k, d * 4 * k, d * 4 * k, dir_x[i * 2 + j], 270 * 16);
+    // draw k = size / 2 layers of arc, centered at centerX, centerY.
+    painter.setPen(QPen(DEFAULT_COLOR, PEN_WIDTH));
+    for (int i = 0; i < BOARD_SIZE; i += 1) {
+        for (int j = 0; j < BOARD_SIZE; j += 1) {
+            painter.save();
+            painter.drawRect(DELTA_X + i * cellSize, DELTA_Y + j * cellSize, cellSize, cellSize);
+            painter.restore();
         }
     }
+    drawArcs(painter, DELTA_X, DELTA_Y, 0, BOARD_SIZE / 2);
+    drawArcs(painter, DELTA_X + BOARD_HEIGHT, DELTA_Y, 270 * 16, BOARD_SIZE / 2);
+    drawArcs(painter, DELTA_X, DELTA_Y + BOARD_HEIGHT, 90 * 16, BOARD_SIZE / 2);
+    drawArcs(painter, DELTA_X + BOARD_HEIGHT, DELTA_Y + BOARD_HEIGHT, 180 * 16, BOARD_SIZE / 2);
+
+
     //最开始初始页面
     if (begin++ == 0)
         InitBoard();
     //点击后提供特效
     if (selectedPieceRow != -1 && selectedPieceCol != -1) {
-        int centerX = stPos.x() + selectedPieceCol * d * k + x;
-        int centerY = stPos.y() + selectedPieceRow * d * k + y;
-
-        // 计算边框矩形的位置
-        QRect borderRect(centerX - d / 2 - borderSize, centerY - d / 2 - borderSize, d + 2 * borderSize,
-                         d + 2 * borderSize);
+        //std::cout<<"Clicked!"<<std::endl;
+        const auto [centerX, centerY] = translateIdx(selectedPieceCol,selectedPieceRow);
+        const QRect rect(centerX - chessRadius, centerY - chessRadius, 2 * chessRadius, 2 * chessRadius);
 
         // 绘制半透明边框
-        painter.setPen(QPen(Qt::red, borderWidth)); // 设置边框颜色和宽度
+        painter.setPen(QPen(Qt::red, selectedSize)); // 设置边框颜色和宽度
         painter.setBrush(Qt::NoBrush); // 不填充颜色，保持边框透明
-        painter.drawEllipse(borderRect);
+        painter.drawEllipse(rect);
     }
 
     drawChess();
 }
 
 void QtBoard::InitBoard() {
-    for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 6; j++) {
+    for (unsigned int i = 0; i < BOARD_SIZE; i++) {
+        for (unsigned int j = 0; j < BOARD_SIZE; j++) {
             if (i < 2)
                 chessColor[i][j] = BLACK;
-            else if (i > 3)
+            else if (i > BOARD_SIZE-3)
                 chessColor[i][j] = WHITE;
             else
                 chessColor[i][j] = NONE;
@@ -271,14 +274,20 @@ void QtBoard::InitBoard() {
 void QtBoard::drawChess() {
     QPainter painter(this);
 
-    for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 6; j++) {
+    for (unsigned int i = 0; i< BOARD_SIZE; i++) {
+        for (unsigned int j = 0; j < BOARD_SIZE; j++) {
             if (chessColor[i][j] == BLACK) {
-                painter.setBrush(QBrush(Qt::black, Qt::SolidPattern));
-                painter.drawEllipse(x + j * d * k - d / 2, y + i * d * k - d / 2, d, d);
+                painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH));
+                painter.setBrush(QBrush(Qt::black, Qt::SolidPattern));     
+                const auto [centerX, centerY] = translateIdx(j,i);
+                const QRect rect(centerX - chessRadius, centerY - chessRadius, 2 * chessRadius, 2 * chessRadius);
+                painter.drawEllipse(rect);
             } else if (chessColor[i][j] == WHITE) {
+                painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH));
                 painter.setBrush(QBrush(Qt::white, Qt::SolidPattern));
-                painter.drawEllipse(x + j * d * k - d / 2, y + i * d * k - d / 2, d, d);
+                const auto [centerX, centerY] = translateIdx(j,i);
+                const QRect rect(centerX - chessRadius, centerY - chessRadius, 2 * chessRadius, 2 * chessRadius);
+                painter.drawEllipse(rect);
             }
         }
     }
@@ -287,17 +296,18 @@ void QtBoard::drawChess() {
 void QtBoard::mousePressEvent(QMouseEvent *event) {
     event->pos();
     if (event->button() == Qt::LeftButton) {
-        int row = (event->y() - stPos.y() + 0.5 * d - y) / (d * k);
-        int col = (event->x() - stPos.x() + 0.5 * d - x) / (d * k);
+        int row = (event->y()-DELTA_Y)/cellSize;
+        int col = (event->x()-DELTA_X)/cellSize;
+
         std::cout << row << "," << col << std::endl;
         // 检查点击的位置是否在棋盘范围内
-        if (row >= 0 && row < 6 && col >= 0 && col < 6) {
+        if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
+
             // 检查点击的位置是否有棋子
             if (chessColor[row][col] != NONE) {
-                // 存储点击的棋子位置
-                selectedPieceRow = row;
-                selectedPieceCol = col;
-                repaint();
+                    selectedPieceRow = row;
+                    selectedPieceCol = col;
+                    repaint();
 
             } else {
                 // 如果已经选择了棋子，则发送移动信息

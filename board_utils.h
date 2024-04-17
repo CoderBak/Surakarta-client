@@ -4,12 +4,12 @@
 #include <QWidget>
 #include <QHostAddress>
 
-constexpr unsigned int BOARD_SIZE = 6;
+constexpr unsigned int BOARD_SIZE = 10;
 constexpr unsigned int maxNoCapture = 40;
 constexpr int WIDTH = 1180;
 constexpr int HEIGHT = 820;
 constexpr int BOARD_HEIGHT = 720 / 2;
-constexpr int DELTA_Y = HEIGHT / 2 - BOARD_HEIGHT / 2 - 13 + BOARD_SIZE / 2;
+constexpr int DELTA_Y = HEIGHT / 2 - BOARD_HEIGHT / 2 - 10;
 constexpr int DELTA_X = 400;
 constexpr int cellSize = BOARD_HEIGHT / BOARD_SIZE;
 constexpr int PEN_WIDTH = 2;

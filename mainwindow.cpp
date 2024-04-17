@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
     centralWidget->setFixedSize(WIDTH, HEIGHT);
     setCentralWidget(centralWidget);
 
+    setStyleSheet(STYLE);
+
     connect(board, &QtBoard::moveInfoReady, this, &MainWindow::sendData_mousePress);
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
     //  connect(tryAgainButton, &QPushButton::clicked, this, &MainWindow::handleTryAgain);
@@ -182,6 +184,7 @@ inline auto drawArcs = [](QPainter &painter, auto centerX, auto centerY, auto st
 
 void QtBoard::paintEvent(QPaintEvent *) {
     QPainter painter(this);
+    painter.fillRect(rect(), BACK_COLOR);
     // draw k = size / 2 layers of arc, centered at centerX, centerY.
     painter.setPen(QPen(DEFAULT_COLOR, PEN_WIDTH));
     for (int i = 0; i < BOARD_SIZE; i += 1) {

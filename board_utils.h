@@ -15,7 +15,7 @@ constexpr int cellSize = BOARD_HEIGHT / BOARD_SIZE;
 constexpr int PEN_WIDTH = 2;
 constexpr auto PATH_COLOR = QColor(173, 216, 230);
 constexpr auto DEFAULT_COLOR = Qt::black;
-constexpr auto BACK_COLOR = Qt::yellow;
+constexpr auto BACK_COLOR = QColor(240, 255, 240);
 constexpr int chessRadius = static_cast<int>(0.35 * cellSize);
 constexpr auto BLACK_COLOR = Qt::black;
 constexpr auto WHITE_COLOR = Qt::white;
@@ -23,6 +23,7 @@ constexpr auto CHESS_BORDER = Qt::black;
 constexpr int selectedSize = 5;
 const QHostAddress serverIP = QHostAddress("localhost");
 constexpr int PORT = 1233;
+const QString STYLE = "background-color: white;";
 using posType = std::pair<unsigned int, unsigned int>;
 enum ChessColor {
     WHITE,

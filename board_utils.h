@@ -36,19 +36,20 @@ Q_OBJECT
 public:
     void setCurrentPlayer(ChessColor cur);
 
-    explicit QtBoard(QWidget *parent = nullptr);
+    QtBoard(QWidget *parent) : QWidget(parent) {
+        this->installEventFilter(this);
+        setMouseTracking(true);
+    }
 
-    ~QtBoard();
+    ~QtBoard() override = default;
 
     void paintEvent(QPaintEvent *) override;
 
     void mousePressEvent(QMouseEvent *event) override;
 
-    bool isBlackChess(ChessColor color);
+    void mouseMoveEvent(QMouseEvent *event) override;
 
-    void isDead();
-
-    void InitBoard();
+    void initBoard();
 
     void processBoardInfo(const QByteArray &boardInfo);
 

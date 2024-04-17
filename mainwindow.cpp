@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QDebug>
 #include <Qpainter>
 #include <QMouseEvent>
 #include <iostream>
@@ -9,28 +8,20 @@
 #include <QString>
 #include <QCursor>
 
-// #include<QSoundEffect>
-QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
-    this->installEventFilter(this);
-}
-
-QtBoard::~QtBoard() {
-}
-
 bool QtBoard::eventFilter(QObject *obj, QEvent *event) {
     if (event->type() == QEvent::MouseButtonPress) {
         auto *mouseEvent = dynamic_cast<QMouseEvent *>(event);
         if (mouseEvent->button() == Qt::LeftButton) {
             // 在此处更改鼠标指针形状
-            QCursor cursor(Qt::PointingHandCursor); // 更改为您希望的指针形状
+            QCursor cursor(Qt::ArrowCursor); // 更改为您希望的指针形状
             setCursor(cursor);
         }
     }
-    // 将事件传递给父类
     return QWidget::eventFilter(obj, event);
 }
-void QtBoard::setCurrentPlayer(ChessColor cur){
-    current_player=cur;
+
+void QtBoard::setCurrentPlayer(ChessColor cur) {
+    current_player = cur;
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -54,12 +45,12 @@ MainWindow::MainWindow(QWidget *parent) :
     layout->addWidget(board);
 
     // 设置布局到中央部件
-    QWidget *centralWidget = new QWidget;
+    auto *centralWidget = new QWidget;
     centralWidget->setLayout(layout);
     centralWidget->setFixedSize(WIDTH, HEIGHT);
     setCentralWidget(centralWidget);
 
-    connect(board, &QtBoard::moveInfoReady, this, &MainWindow::sendData_mousepress);
+    connect(board, &QtBoard::moveInfoReady, this, &MainWindow::sendData_mousePress);
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
     //  connect(tryAgainButton, &QPushButton::clicked, this, &MainWindow::handleTryAgain);
     //  connect(giveUpButton, &QPushButton::clicked, this, &MainWindow::handleGiveUp);
@@ -82,7 +73,7 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::sendData_mousepress(const QString &moveInfo) {
+void MainWindow::sendData_mousePress(const QString &moveInfo) {
     // When perform move, the info format is : M4;5;3;4
     QByteArray data;
     // data.append("M");
@@ -108,71 +99,22 @@ void MainWindow::getData() {
     if (data[0] == 'S') {
         qDebug() << "I'm player " << data[1];
         ChessColor cur;
-        switch(data[1]){
-                case 'B':
-                    board->setCurrentPlayer(BLACK);
-                    break;
-                case 'W':
-                    board->setCurrentPlayer(WHITE);
-                    break;
-                default:
-                    board->setCurrentPlayer(NONE);
-                    break;
+        switch (data[1]) {
+            case 'B':
+                board->setCurrentPlayer(BLACK);
+                break;
+            case 'W':
+                board->setCurrentPlayer(WHITE);
+                break;
+            default:
+                board->setCurrentPlayer(NONE);
+                break;
         }
     } else {
         board->processBoardInfo(data);
     }
     socket->read(socket->bytesAvailable());
 }
-
-// void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
-//     // 将字节数组转换为字符串
-//     QString boardInfoStr = QString::fromUtf8(boardInfo);
-
-//     // 去除字符串两端的空白字符和引号
-//     QString sanitizedInfo = boardInfoStr.trimmed();
-//     sanitizedInfo.remove("\"");
-
-//     // 分割字符串为行
-//     QStringList rows = sanitizedInfo.split('\n');
-
-//     // 遍历每一行数据
-//     for (int row = 0; row < 6; ++row) {
-//         QString rowString = rows.value(row).trimmed();
-//     qDebug()<<rows.value(row).trimmed();
-//         // 遍历每一列数据
-//         for (int col = 0; col < 6; ++col) {
-//             QChar pieceChar = rowString.at(col);
-//             qDebug()<<pieceChar.toLatin1();
-//             switch (pieceChar.toLatin1()) {
-//                 case 'B':
-//                     chessColor[col][row] = BLACK;
-//                     break;
-//                 case 'W':
-//                     chessColor[col][row] = WHITE;
-//                     break;
-//                 case '.':
-//                     chessColor[col][row] = NONE;
-//                     break;
-//                 default:
-//                    // qDebug() << "Error: Invalid piece character!";
-//                // qDebug()<<pieceChar.toLatin1();
-//                 break;
-//             }
-//         }
-//     }
-
-//     // 打印二维数组，以便调试
-//     for (int row = 0; row < 6; ++row) {
-//         for (int col = 0; col < 6; ++col) {
-//             std::cout << (chessColor[col][row] == BLACK ? "B" : (chessColor[col][row] == WHITE ? "W" : "."));
-//         }
-//      std::cout << std::endl;
-//    }
-
-//     // 重新绘制棋盘
-//     repaint();
-// }
 
 void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
     // 将字节数组转换为字符串
@@ -182,12 +124,12 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
     QStringList rows = boardInfoStr.split('\n');
 
     // 遍历每一行数据
-    for (int row = 0; row < 6; ++row) {
+    for (int row = 0; row < BOARD_SIZE; row += 1) {
         QString rowString = rows.value(row).trimmed();
         rowString.remove(' ');
         // 使用输入输出流读取数据并存储到二维数组中
         QTextStream stream(&rowString);
-        for (int col = 0; col < 6; ++col) {
+        for (int col = 0; col < BOARD_SIZE; col += 1) {
             QChar pieceChar;
             stream >> pieceChar;
             qDebug() << pieceChar;
@@ -256,8 +198,10 @@ void QtBoard::paintEvent(QPaintEvent *) {
 
 
     //最开始初始页面
-    if (begin++ == 0)
-        InitBoard();
+    if (begin == 0) {
+        initBoard();
+    }
+    begin += 1;
     //点击后提供特效
     if (selectedPieceRow != -1 && selectedPieceCol != -1) {
         //std::cout<<"Clicked!"<<std::endl;
@@ -273,16 +217,16 @@ void QtBoard::paintEvent(QPaintEvent *) {
     drawChess();
 }
 
-void QtBoard::InitBoard() {
+void QtBoard::initBoard() {
     for (unsigned int i = 0; i < BOARD_SIZE; i++) {
         for (unsigned int j = 0; j < BOARD_SIZE; j++) {
-            if (i < 2)
+            if (i < 2) {
                 chessColor[i][j] = BLACK;
-            else if (i > BOARD_SIZE - 3)
+            } else if (i > BOARD_SIZE - 3) {
                 chessColor[i][j] = WHITE;
-            else
+            } else {
                 chessColor[i][j] = NONE;
-
+            }
         }
     }
 }
@@ -292,15 +236,10 @@ void QtBoard::drawChess() {
 
     for (unsigned int i = 0; i < BOARD_SIZE; i++) {
         for (unsigned int j = 0; j < BOARD_SIZE; j++) {
-            if (chessColor[i][j] == BLACK) {
+            if (chessColor[i][j] != NONE) {
+                const auto currentColor = (chessColor[i][j] == BLACK) ? Qt::black : Qt::white;
                 painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH));
-                painter.setBrush(QBrush(Qt::black, Qt::SolidPattern));
-                const auto [centerX, centerY] = translateIdx(j, i);
-                const QRect rect(centerX - chessRadius, centerY - chessRadius, 2 * chessRadius, 2 * chessRadius);
-                painter.drawEllipse(rect);
-            } else if (chessColor[i][j] == WHITE) {
-                painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH));
-                painter.setBrush(QBrush(Qt::white, Qt::SolidPattern));
+                painter.setBrush(QBrush(currentColor, Qt::SolidPattern));
                 const auto [centerX, centerY] = translateIdx(j, i);
                 const QRect rect(centerX - chessRadius, centerY - chessRadius, 2 * chessRadius, 2 * chessRadius);
                 painter.drawEllipse(rect);
@@ -318,9 +257,8 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
         std::cout << row << "," << col << std::endl;
         // 检查点击的位置是否在棋盘范围内
         if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
-
             // 检查点击的位置是否有棋子
-            if (chessColor[row][col] ==current_player) {
+            if (chessColor[row][col] == current_player) {
                 selectedPieceRow = row;
                 selectedPieceCol = col;
                 repaint();
@@ -348,3 +286,25 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
     }
 }
 
+void QtBoard::mouseMoveEvent(QMouseEvent *event) {
+    QWidget::mouseMoveEvent(event);
+
+    // 获取鼠标当前位置
+    QPoint mousePos = event->pos();
+    // qDebug() << mousePos;
+    // 将屏幕坐标转换为棋盘坐标
+    const int x = mousePos.x(), y = mousePos.y();
+    const int dx = x - DELTA_X, dy = y - DELTA_Y;
+    if (dx >= 0 && dx <= BOARD_HEIGHT && dy >= 0 && dy <= BOARD_HEIGHT) {
+        int row = dy / cellSize;
+        int col = dx / cellSize;
+        if (chessColor[row][col] == current_player) {
+            const auto [centerX, centerY] = translateIdx(col, row);
+            if (std::pow(centerX - x, 2) + std::pow(centerY - y, 2) <= std::pow(chessRadius, 2)) {
+                QApplication::setOverrideCursor(Qt::PointingHandCursor);
+                return;
+            }
+        }
+    }
+    QApplication::setOverrideCursor(Qt::ArrowCursor);
+}

@@ -20,7 +20,7 @@ public:
 
 private slots:
 
-    void sendData_mousepress(const QString &);
+    void sendData_mousePress(const QString &);
 
     void sendData();
 

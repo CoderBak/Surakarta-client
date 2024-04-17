@@ -34,6 +34,8 @@ class QtBoard : public QWidget {
 Q_OBJECT
 
 public:
+    void setCurrentPlayer(ChessColor cur);
+
     explicit QtBoard(QWidget *parent = nullptr);
 
     ~QtBoard();
@@ -60,6 +62,7 @@ signals:
 
 private:
     ChessColor chessColor[BOARD_SIZE][BOARD_SIZE];
+    ChessColor current_player;
     int begin = 0;
     int selectedPieceRow = -1;
     int selectedPieceCol = -1;

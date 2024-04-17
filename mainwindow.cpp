@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "board_utils.h"
 #include <QDebug>
 #include <Qpainter>
 #include <QMouseEvent>
@@ -30,7 +29,9 @@ bool QtBoard::eventFilter(QObject *obj, QEvent *event) {
     // 将事件传递给父类
     return QWidget::eventFilter(obj, event);
 }
-
+void QtBoard::setCurrentPlayer(ChessColor cur){
+    current_player=cur;
+}
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
@@ -63,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //  connect(tryAgainButton, &QPushButton::clicked, this, &MainWindow::handleTryAgain);
     //  connect(giveUpButton, &QPushButton::clicked, this, &MainWindow::handleGiveUp);
     // connect(openChatroomButton, &QPushButton::clicked, this, &MainWindow::handleOpenChatroom);
-    socket->connectToHost(serverIP, PORT);
+    socket->connectToHost("localhost", PORT);
     if (!socket->waitForConnected()) {
         qDebug() << "Failed to connect to remote host, try to connect localhost";
         socket->connectToHost("localhost", PORT);
@@ -106,6 +107,18 @@ void MainWindow::getData() {
     qDebug() << "Received message from server: " << data;
     if (data[0] == 'S') {
         qDebug() << "I'm player " << data[1];
+        ChessColor cur;
+        switch(data[1]){
+                case 'B':
+                    board->setCurrentPlayer(BLACK);
+                    break;
+                case 'W':
+                    board->setCurrentPlayer(WHITE);
+                    break;
+                default:
+                    board->setCurrentPlayer(NONE);
+                    break;
+        }
     } else {
         board->processBoardInfo(data);
     }
@@ -307,7 +320,7 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
         if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
 
             // 检查点击的位置是否有棋子
-            if (chessColor[row][col] != NONE) {
+            if (chessColor[row][col] ==current_player) {
                 selectedPieceRow = row;
                 selectedPieceCol = col;
                 repaint();

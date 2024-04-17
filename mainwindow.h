@@ -30,6 +30,7 @@ private slots:
     // void handleOpenChatroom();
 
 private:
+
     Ui::MainWindow *ui;
     QTcpSocket *socket;
     QtBoard *board;

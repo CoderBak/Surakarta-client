@@ -1,7 +1,8 @@
 #ifndef QTBOARD_H
 #define QTBOARD_H
 
-#include<QWidget>
+#include <QWidget>
+#include <QHostAddress>
 
 constexpr unsigned int BOARD_SIZE = 6;
 constexpr unsigned int maxNoCapture = 40;
@@ -20,6 +21,8 @@ constexpr auto BLACK_COLOR = Qt::black;
 constexpr auto WHITE_COLOR = Qt::white;
 constexpr auto CHESS_BORDER = Qt::black;
 constexpr int selectedSize = 5;
+const QHostAddress serverIP = QHostAddress("localhost");
+constexpr int PORT = 1233;
 using posType = std::pair<unsigned int, unsigned int>;
 enum ChessColor {
     WHITE,
@@ -35,13 +38,13 @@ public:
 
     ~QtBoard();
 
-    void paintEvent(QPaintEvent *);
+    void paintEvent(QPaintEvent *) override;
 
-    void mousePressEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event) override;
 
-    bool IsBlackChess(ChessColor color);
+    bool isBlackChess(ChessColor color);
 
-    void IsDead();
+    void isDead();
 
     void InitBoard();
 

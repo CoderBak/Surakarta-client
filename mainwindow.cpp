@@ -63,12 +63,16 @@ MainWindow::MainWindow(QWidget *parent) :
     //  connect(tryAgainButton, &QPushButton::clicked, this, &MainWindow::handleTryAgain);
     //  connect(giveUpButton, &QPushButton::clicked, this, &MainWindow::handleGiveUp);
     // connect(openChatroomButton, &QPushButton::clicked, this, &MainWindow::handleOpenChatroom);
-    socket->connectToHost("localhost", 1234);
+    socket->connectToHost(serverIP, PORT);
     if (!socket->waitForConnected()) {
-        qDebug() << "Failed to connect to host.";
-        exit(-1);
+        qDebug() << "Failed to connect to remote host, try to connect localhost";
+        socket->connectToHost("localhost", PORT);
+        if (!socket->waitForConnected()) {
+            qDebug() << "Failed to connect to localhost, abort!";
+            exit(-1);
+        }
     } else {
-        qDebug() << "Connected successfully!";
+        qDebug() << "Remote host connected successfully!";
     }
     connect(ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendData);
 }
@@ -295,8 +299,8 @@ void QtBoard::drawChess() {
 void QtBoard::mousePressEvent(QMouseEvent *event) {
     event->pos();
     if (event->button() == Qt::LeftButton) {
-        int row = (event->y() - DELTA_Y) / cellSize;
-        int col = (event->x() - DELTA_X) / cellSize;
+        int row = (static_cast<int>(event->position().y()) - DELTA_Y) / cellSize;
+        int col = (static_cast<int>(event->position().x()) - DELTA_X) / cellSize;
 
         std::cout << row << "," << col << std::endl;
         // 检查点击的位置是否在棋盘范围内

@@ -3,6 +3,24 @@
 
 #include<QWidget>
 
+constexpr unsigned int BOARD_SIZE = 6;
+constexpr unsigned int maxNoCapture = 40;
+constexpr int WIDTH = 1180;
+constexpr int HEIGHT = 820;
+constexpr int BOARD_HEIGHT = 720 / 2;
+constexpr int DELTA_Y = HEIGHT / 2 - BOARD_HEIGHT / 2;
+constexpr int DELTA_X = 300;
+constexpr int cellSize = BOARD_HEIGHT / BOARD_SIZE;
+constexpr int PEN_WIDTH = 2;
+constexpr auto PATH_COLOR = QColor(173, 216, 230);
+constexpr auto DEFAULT_COLOR = Qt::black;
+constexpr auto BACK_COLOR = Qt::yellow;
+constexpr int chessRadius = static_cast<int>(0.35 * cellSize);
+constexpr auto BLACK_COLOR = Qt::black;
+constexpr auto WHITE_COLOR = Qt::white;
+constexpr auto CHESS_BORDER = Qt::black;
+constexpr int selectedSize = 5;
+using posType = std::pair<unsigned int, unsigned int>;
 enum ChessColor {
     WHITE,
     BLACK,
@@ -33,26 +51,15 @@ public:
 
     bool eventFilter(QObject *obj, QEvent *event) override;
 
-    ChessColor checkTurn();
-
 signals:
 
     void moveInfoReady(const QString &moveInfo);
 
 private:
-    ChessColor chessColor[6][6];
-    int d = 60;//棋子直径 or 9/10の棋盘直径
-    int x = 280;//增大整个图形向右动
-    int y = 140;//增大整个图形向下动
-    int turn = 0;
+    ChessColor chessColor[BOARD_SIZE][BOARD_SIZE];
     int begin = 0;
-    double k = (double) 10 / 9;
-    //注意，保证了棋盘间距比棋子略大
     int selectedPieceRow = -1;
     int selectedPieceCol = -1;
-    int borderSize = 2;
-    int borderWidth = 5;
-    QPoint stPos, edPos;
 private slots:
 
 };

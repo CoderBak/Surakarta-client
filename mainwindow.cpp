@@ -38,28 +38,24 @@ MainWindow::MainWindow(QWidget *parent) :
         socket(new QTcpSocket(this)),
         board(new QtBoard(this)) {
     ui->setupUi(this);
-    //setCentralWidget(board);
-    setFixedSize(1000, 900);
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(board);
-    // 创建三个按钮
-    QPushButton *tryAgainButton = new QPushButton("Try Again", this);
-    QPushButton *giveUpButton = new QPushButton("Give Up", this);
-    QPushButton *openChatroomButton = new QPushButton("Open Chatroom", this);
-
-    // 添加三个按钮到布局中
-    layout->addWidget(tryAgainButton);
-    layout->addWidget(giveUpButton);
-    layout->addWidget(openChatroomButton);
+    QHBoxLayout *layout = new QHBoxLayout;
+    QVBoxLayout *menu = new QVBoxLayout;
 
     // 添加编辑框和发送按钮到布局中
-    layout->addWidget(ui->lineEdit1);
-    layout->addWidget(ui->lineEdit2);
-    layout->addWidget(ui->pushButton);
+    menu->addWidget(ui->lineEdit1);
+    menu->addWidget(ui->lineEdit2);
+    menu->addWidget(ui->sendButton);
+    menu->addWidget(ui->tryAgainButton);
+    menu->addWidget(ui->giveUpButton);
+    menu->addWidget(ui->openChatroomButton);
+
+    layout->addLayout(menu);
+    layout->addWidget(board);
 
     // 设置布局到中央部件
     QWidget *centralWidget = new QWidget;
     centralWidget->setLayout(layout);
+    centralWidget->setFixedSize(WIDTH, HEIGHT);
     setCentralWidget(centralWidget);
 
     connect(board, &QtBoard::moveInfoReady, this, &MainWindow::sendData_mousepress);
@@ -74,7 +70,7 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
         qDebug() << "Connected successfully!";
     }
-    connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::sendData);
+    connect(ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendData);
 }
 
 MainWindow::~MainWindow() {
@@ -104,7 +100,11 @@ void MainWindow::sendData() {
 void MainWindow::getData() {
     QByteArray data = socket->readAll();
     qDebug() << "Received message from server: " << data;
-    board->processBoardInfo(data);
+    if (data[0] == 'S') {
+        qDebug() << "I'm player " << data[1];
+    } else {
+        board->processBoardInfo(data);
+    }
     socket->read(socket->bytesAvailable());
 }
 
@@ -205,8 +205,7 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
     repaint();
 }
 
-inline std::pair<int, int> translateIdx(const unsigned int x, const unsigned int y)
-{
+inline std::pair<int, int> translateIdx(const unsigned int x, const unsigned int y) {
     return std::make_pair(DELTA_X + x * cellSize + cellSize / 2, DELTA_Y + y * cellSize + cellSize / 2);
 }
 
@@ -245,7 +244,7 @@ void QtBoard::paintEvent(QPaintEvent *) {
     //点击后提供特效
     if (selectedPieceRow != -1 && selectedPieceCol != -1) {
         //std::cout<<"Clicked!"<<std::endl;
-        const auto [centerX, centerY] = translateIdx(selectedPieceCol,selectedPieceRow);
+        const auto [centerX, centerY] = translateIdx(selectedPieceCol, selectedPieceRow);
         const QRect rect(centerX - chessRadius, centerY - chessRadius, 2 * chessRadius, 2 * chessRadius);
 
         // 绘制半透明边框
@@ -262,7 +261,7 @@ void QtBoard::InitBoard() {
         for (unsigned int j = 0; j < BOARD_SIZE; j++) {
             if (i < 2)
                 chessColor[i][j] = BLACK;
-            else if (i > BOARD_SIZE-3)
+            else if (i > BOARD_SIZE - 3)
                 chessColor[i][j] = WHITE;
             else
                 chessColor[i][j] = NONE;
@@ -274,18 +273,18 @@ void QtBoard::InitBoard() {
 void QtBoard::drawChess() {
     QPainter painter(this);
 
-    for (unsigned int i = 0; i< BOARD_SIZE; i++) {
+    for (unsigned int i = 0; i < BOARD_SIZE; i++) {
         for (unsigned int j = 0; j < BOARD_SIZE; j++) {
             if (chessColor[i][j] == BLACK) {
                 painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH));
-                painter.setBrush(QBrush(Qt::black, Qt::SolidPattern));     
-                const auto [centerX, centerY] = translateIdx(j,i);
+                painter.setBrush(QBrush(Qt::black, Qt::SolidPattern));
+                const auto [centerX, centerY] = translateIdx(j, i);
                 const QRect rect(centerX - chessRadius, centerY - chessRadius, 2 * chessRadius, 2 * chessRadius);
                 painter.drawEllipse(rect);
             } else if (chessColor[i][j] == WHITE) {
                 painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH));
                 painter.setBrush(QBrush(Qt::white, Qt::SolidPattern));
-                const auto [centerX, centerY] = translateIdx(j,i);
+                const auto [centerX, centerY] = translateIdx(j, i);
                 const QRect rect(centerX - chessRadius, centerY - chessRadius, 2 * chessRadius, 2 * chessRadius);
                 painter.drawEllipse(rect);
             }
@@ -296,8 +295,8 @@ void QtBoard::drawChess() {
 void QtBoard::mousePressEvent(QMouseEvent *event) {
     event->pos();
     if (event->button() == Qt::LeftButton) {
-        int row = (event->y()-DELTA_Y)/cellSize;
-        int col = (event->x()-DELTA_X)/cellSize;
+        int row = (event->y() - DELTA_Y) / cellSize;
+        int col = (event->x() - DELTA_X) / cellSize;
 
         std::cout << row << "," << col << std::endl;
         // 检查点击的位置是否在棋盘范围内
@@ -305,9 +304,9 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
 
             // 检查点击的位置是否有棋子
             if (chessColor[row][col] != NONE) {
-                    selectedPieceRow = row;
-                    selectedPieceCol = col;
-                    repaint();
+                selectedPieceRow = row;
+                selectedPieceCol = col;
+                repaint();
 
             } else {
                 // 如果已经选择了棋子，则发送移动信息

@@ -65,7 +65,7 @@ signals:
 private:
     ChessColor chessColor[BOARD_SIZE][BOARD_SIZE];
     ChessColor current_player;
-    int begin = 0;
+    bool started = false;
     int selectedPieceRow = -1;
     int selectedPieceCol = -1;
 private slots:

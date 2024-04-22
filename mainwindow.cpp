@@ -217,14 +217,32 @@ void QtBoard::paintEvent(QPaintEvent *) {
     drawArcs(painter, DELTA_X, DELTA_Y + BOARD_HEIGHT, 90 * 16, BOARD_SIZE / 2);
     drawArcs(painter, DELTA_X + BOARD_HEIGHT, DELTA_Y + BOARD_HEIGHT, 180 * 16, BOARD_SIZE / 2);
 
-    // Show the chess at clicked.
-    if (selectedPieceRow != -1 && selectedPieceCol != -1) {
-        const auto [centerX, centerY] = translateIdx(selectedPieceCol, selectedPieceRow);
+    auto emphasize = [&](const int col, const int row, auto color) {
+        const auto [centerX, centerY] = translateIdx(col, row);
         const QRect rect(centerX - chessRadius, centerY - chessRadius, 2 * chessRadius, 2 * chessRadius);
-        painter.setPen(QPen(Qt::red, selectedSize));
+        painter.setPen(QPen(color, selectedSize));
         painter.setBrush(Qt::NoBrush);
         painter.drawEllipse(rect);
+    };
+
+    // Show the chess at clicked.
+    if (selectedPieceRow != -1 && selectedPieceCol != -1) {
+        emphasize(selectedPieceCol, selectedPieceRow, SELECTED_COLOR);
     }
+
+    // Show the eatable
+    for (const auto &elem: eatable) {
+        emphasize(elem.first.second, elem.first.first, EATABLE_COLOR);
+        for (const auto &item: elem.second) {
+            emphasize(item.second, item.first, EATABLE_PATH_COLOR);
+        }
+    }
+
+    // Show the movable
+    for (const auto &elem: movable) {
+        emphasize(elem.second, elem.first, MOVABLE_COLOR);
+    }
+
     drawChess();
 }
 
@@ -265,6 +283,8 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
                     emit sendMoveInfo(moveInfo.toUtf8());
                     qDebug() << moveInfo;
                     selectedPieceRow = selectedPieceCol = -1;
+                    movable.clear();
+                    eatable.clear();
                 }
             }
         }
@@ -272,11 +292,52 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
 }
 
 void QtBoard::handleMovable(const QByteArray &info) {
-    qDebug() << "movable:" << info;
+    movable.clear();
+    auto startIdx = info.indexOf("|");
+    int n = info.left(startIdx).toInt();
+    if (n != 0) {
+        QString coords = info.mid(startIdx + 1);
+        QStringList pairs = coords.split("|");
+        for (const QString &pair: pairs) {
+            QStringList values = pair.split(";");
+            int x = values[0].toInt(), y = values[1].toInt();
+            movable.emplace_back(x, y);
+        }
+    }
+    repaint();
 }
 
 void QtBoard::handleEatable(const QByteArray &info) {
-    qDebug() << "eatable:" << info;
+    // example:
+    // 2|6;7@2;1@2;2@2;3@2;4@2;5@2;6@2;7@2;8@2;9@0;7@1;7@2;7@3;7@4;7@5;7@6;7|8;2@0;2@1;2@2;2@3;2@4;2@5;2@6;2@7;2@8;2
+    eatable.clear();
+    auto startIdx = info.indexOf("|");
+    int n = info.left(startIdx).toInt();
+    if (n != 0) {
+        QString coords = info.mid(startIdx + 1);
+        QStringList paths = coords.split("|");
+        for (const QString &path: paths) {
+            QStringList pairs = path.split("@");
+            bool started = false;
+            posType target;
+            std::vector<posType> generatedPath;
+            for (const QString &pair: pairs) {
+                auto unzip = [&]() {
+                    QStringList values = pair.split(";");
+                    return std::make_pair(values[0].toInt(), values[1].toInt());
+                };
+                if (!started) {
+                    target = unzip();
+                    started = true;
+                } else {
+                    generatedPath.push_back(unzip());
+                }
+            }
+            generatedPath.pop_back();
+            eatable.emplace_back(target, generatedPath);
+        }
+    }
+    repaint();
 }
 
 // Handle move mouse event.

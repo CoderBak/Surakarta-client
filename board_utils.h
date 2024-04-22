@@ -5,7 +5,7 @@
 #include <QHostAddress>
 
 using posType = std::pair<int, int>;
-constexpr unsigned int BOARD_SIZE = 10;
+constexpr unsigned int BOARD_SIZE = 6;
 constexpr unsigned int maxNoCapture = 40;
 constexpr int WIDTH = 1180;
 constexpr int HEIGHT = 820;
@@ -21,6 +21,10 @@ constexpr int chessRadius = static_cast<int>(0.35 * cellSize);
 constexpr auto BLACK_COLOR = Qt::black;
 constexpr auto WHITE_COLOR = Qt::white;
 constexpr auto CHESS_BORDER = Qt::black;
+constexpr auto SELECTED_COLOR = Qt::red;
+constexpr auto EATABLE_COLOR = Qt::blue;
+constexpr auto MOVABLE_COLOR = Qt::green;
+constexpr auto EATABLE_PATH_COLOR = Qt::yellow;
 constexpr int selectedSize = 5;
 const QHostAddress serverIP = QHostAddress("20.212.82.172");
 constexpr int PORT = 1233;
@@ -80,6 +84,8 @@ private:
     ChessColor current_player;
     int selectedPieceRow = -1;
     int selectedPieceCol = -1;
+    std::vector<posType> movable;
+    std::vector<std::pair<posType, std::vector<posType>>> eatable;
 };
 
 #endif // QTBOARD_H

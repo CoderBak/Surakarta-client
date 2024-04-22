@@ -26,7 +26,7 @@ void QtBoard::setCurrentPlayer(ChessColor cur) {
 }
 
 // Send the pressed information.
-void MainWindow::sendData_mousePress(const QString &moveInfo) {
+void MainWindow::sendMousePress(const QString &moveInfo) {
     QByteArray data;
     data.append(moveInfo.toUtf8());
     socket->write(data);
@@ -64,14 +64,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Connect the button to functions.
     connect(ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendData);
-    connect(board, &QtBoard::moveInfoReady, this, &MainWindow::sendData_mousePress);
-    // connect(tryAgainButton, &QPushButton::clicked, this, &MainWindow::handleTryAgain);
+    connect(board, &QtBoard::moveInfoReady, this, &MainWindow::sendMousePress);
+    connect(ui->tryAgainButton, &QPushButton::clicked, this, &MainWindow::sendTryAgain);
     // connect(giveUpButton, &QPushButton::clicked, this, &MainWindow::handleGiveUp);
     // connect(openChatroomButton, &QPushButton::clicked, this, &MainWindow::handleOpenChatroom);
 
     // Connect the server.
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
-    socket->connectToHost(serverIP, PORT);
+    socket->connectToHost("localhost", PORT);
     if (!socket->waitForConnected()) {
         qDebug() << "Failed to connect to remote host, try to connect localhost";
         socket->connectToHost("localhost", PORT);
@@ -91,21 +91,47 @@ MainWindow::~MainWindow() {
 // send data in this format: M3;2;2;3
 void MainWindow::sendData() {
     QByteArray data;
-    data.append("M");
+    data.append("$M");
     data.append(ui->lineEdit1->text().toUtf8());
     data.append(";");
     data.append(ui->lineEdit2->text().toUtf8());
     socket->write(data);
 }
 
+void MainWindow::sendTryAgain() {
+    socket->write("$G;");
+}
+
 // Process data in this function.
 void MainWindow::getData() {
     QByteArray data = socket->readAll();
     qDebug() << "Received message from server: " << data;
-    switch (data[0]) {
+    if (data[0] != '$') {
+        qDebug() << "Wrong format!";
+    } else {
+        while (true) {
+            const auto endPos = data.indexOf('$', 1);
+            if (endPos != -1) {
+                QByteArray packet = data.mid(1, endPos - 1);
+                data.remove(0, endPos);
+                dataHandler(packet);
+                qDebug() << data;
+            } else {
+                data.remove(0, 1);
+                dataHandler(data);
+                break;
+            }
+        }
+    }
+    socket->read(socket->bytesAvailable());
+}
+
+void MainWindow::dataHandler(const QByteArray &info) {
+    qDebug() << "Processing info:" << info;
+    switch (info[0]) {
         case 'S':
-            qDebug() << "I'm player" << data[1];
-            switch (data[1]) {
+            qDebug() << "I'm player" << info[1];
+            switch (info[1]) {
                 case 'B':
                     board->setCurrentPlayer(BLACK);
                     break;
@@ -117,9 +143,8 @@ void MainWindow::getData() {
             }
             break;
         default:
-            board->processBoardInfo(data);
+            board->processBoardInfo(info);
     }
-    socket->read(socket->bytesAvailable());
 }
 
 // Process boardInfo in this function.
@@ -187,11 +212,6 @@ void QtBoard::paintEvent(QPaintEvent *) {
     drawArcs(painter, DELTA_X, DELTA_Y + BOARD_HEIGHT, 90 * 16, BOARD_SIZE / 2);
     drawArcs(painter, DELTA_X + BOARD_HEIGHT, DELTA_Y + BOARD_HEIGHT, 180 * 16, BOARD_SIZE / 2);
 
-    if (!started) {
-        initBoard();
-        started = true;
-    }
-
     // Show the chess at clicked.
     if (selectedPieceRow != -1 && selectedPieceCol != -1) {
         const auto [centerX, centerY] = translateIdx(selectedPieceCol, selectedPieceRow);
@@ -201,20 +221,6 @@ void QtBoard::paintEvent(QPaintEvent *) {
         painter.drawEllipse(rect);
     }
     drawChess();
-}
-
-void QtBoard::initBoard() {
-    for (unsigned int i = 0; i < BOARD_SIZE; i++) {
-        for (unsigned int j = 0; j < BOARD_SIZE; j++) {
-            if (i < 2) {
-                chessColor[i][j] = BLACK;
-            } else if (i > BOARD_SIZE - 3) {
-                chessColor[i][j] = WHITE;
-            } else {
-                chessColor[i][j] = NONE;
-            }
-        }
-    }
 }
 
 // Draw all the chess.
@@ -247,7 +253,7 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
                 repaint();
             } else {
                 if (selectedPieceRow != -1 && selectedPieceCol != -1) {
-                    QString moveInfo = QString("M%1;%2;%3;%4")
+                    QString moveInfo = QString("$M%1;%2;%3;%4")
                             .arg(selectedPieceCol).arg(selectedPieceRow)
                             .arg(col).arg(row);
                     std::cout << selectedPieceRow << "," << selectedPieceCol << ";" << row << "," << col << std::endl;

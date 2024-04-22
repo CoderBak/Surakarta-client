@@ -20,16 +20,20 @@ public:
 
 private slots:
 
-    void sendData_mousePress(const QString &);
+    void sendMousePress(const QString &);
 
     void sendData();
 
+    void sendTryAgain();
+
     void getData();
+
     // void handleTryAgain();
     // void handleGiveUp();
     // void handleOpenChatroom();
 
 private:
+    void dataHandler(const QByteArray &info);
 
     Ui::MainWindow *ui;
     QTcpSocket *socket;

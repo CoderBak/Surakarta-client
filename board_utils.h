@@ -24,7 +24,6 @@ constexpr int selectedSize = 5;
 const QHostAddress serverIP = QHostAddress("20.212.82.172");
 constexpr int PORT = 1233;
 const QString STYLE = "background-color: white;";
-using posType = std::pair<unsigned int, unsigned int>;
 enum ChessColor {
     WHITE,
     BLACK,
@@ -37,9 +36,14 @@ Q_OBJECT
 public:
     void setCurrentPlayer(ChessColor cur);
 
-    QtBoard(QWidget *parent) : QWidget(parent) {
+    explicit QtBoard(QWidget *parent) : QWidget(parent) {
         this->installEventFilter(this);
         setMouseTracking(true);
+        for (int i = 0; i < BOARD_SIZE; i += 1) {
+            for (int j = 0; j < BOARD_SIZE; j += 1) {
+                chessColor[i][j] = ChessColor::NONE;
+            }
+        }
     }
 
     ~QtBoard() override = default;
@@ -49,8 +53,6 @@ public:
     void mousePressEvent(QMouseEvent *event) override;
 
     void mouseMoveEvent(QMouseEvent *event) override;
-
-    void initBoard();
 
     void processBoardInfo(const QByteArray &boardInfo);
 
@@ -65,7 +67,6 @@ signals:
 private:
     ChessColor chessColor[BOARD_SIZE][BOARD_SIZE];
     ChessColor current_player;
-    bool started = false;
     int selectedPieceRow = -1;
     int selectedPieceCol = -1;
 private slots:

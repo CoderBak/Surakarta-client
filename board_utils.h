@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QHostAddress>
 
+using posType = std::pair<int, int>;
 constexpr unsigned int BOARD_SIZE = 10;
 constexpr unsigned int maxNoCapture = 40;
 constexpr int WIDTH = 1180;
@@ -23,7 +24,7 @@ constexpr auto CHESS_BORDER = Qt::black;
 constexpr int selectedSize = 5;
 const QHostAddress serverIP = QHostAddress("20.212.82.172");
 constexpr int PORT = 1233;
-const QString STYLE = "background-color: white;";
+// const QString STYLE = "background-color: white;";
 enum ChessColor {
     WHITE,
     BLACK,
@@ -62,15 +63,23 @@ public:
 
 signals:
 
-    void moveInfoReady(const QString &moveInfo);
+    void sendMoveInfo(const QByteArray &moveInfo);
+
+    void sendEatableQuery(const posType &pos);
+
+    void sendMovableQuery(const posType &pos);
+
+public slots:
+
+    void handleEatable(const QByteArray &);
+
+    void handleMovable(const QByteArray &);
 
 private:
     ChessColor chessColor[BOARD_SIZE][BOARD_SIZE];
     ChessColor current_player;
     int selectedPieceRow = -1;
     int selectedPieceCol = -1;
-private slots:
-
 };
 
 #endif // QTBOARD_H

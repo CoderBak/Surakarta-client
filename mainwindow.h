@@ -20,9 +20,11 @@ public:
 
 private slots:
 
-    void sendMousePress(const QString &);
+    void handleEatableQuery(const posType &pos);
 
-    void sendData();
+    void handleMovableQuery(const posType &pos);
+
+    void handleMoveInfo(const QByteArray &);
 
     void sendTryAgain();
 
@@ -32,12 +34,19 @@ private slots:
     // void handleGiveUp();
     // void handleOpenChatroom();
 
+signals:
+
+    void sendEatable(const QByteArray &info);
+
+    void sendMovable(const QByteArray &info);
+
 private:
     void dataHandler(const QByteArray &info);
 
     Ui::MainWindow *ui;
     QTcpSocket *socket;
     QtBoard *board;
+    QByteArray msg;
 };
 
 #endif //MAINWINDOW_H

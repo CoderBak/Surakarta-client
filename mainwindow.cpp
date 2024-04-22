@@ -26,10 +26,18 @@ void QtBoard::setCurrentPlayer(ChessColor cur) {
 }
 
 // Send the pressed information.
-void MainWindow::sendMousePress(const QString &moveInfo) {
-    QByteArray data;
-    data.append(moveInfo.toUtf8());
-    socket->write(data);
+void MainWindow::handleMoveInfo(const QByteArray &moveInfo) {
+    socket->write(moveInfo);
+}
+
+void MainWindow::handleEatableQuery(const posType &pos) {
+    QByteArray query = QString("$QC%1;%2").arg(pos.first).arg(pos.second).toUtf8();
+    socket->write(query);
+}
+
+void MainWindow::handleMovableQuery(const posType &pos) {
+    QByteArray query = QString("$QN%1;%2").arg(pos.first).arg(pos.second).toUtf8();
+    socket->write(query);
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -44,9 +52,6 @@ MainWindow::MainWindow(QWidget *parent) :
     auto *menu = new QVBoxLayout;
 
     // Add buttons to the menu.
-    menu->addWidget(ui->lineEdit1);
-    menu->addWidget(ui->lineEdit2);
-    menu->addWidget(ui->sendButton);
     menu->addWidget(ui->tryAgainButton);
     menu->addWidget(ui->giveUpButton);
     menu->addWidget(ui->openChatroomButton);
@@ -60,11 +65,14 @@ MainWindow::MainWindow(QWidget *parent) :
     centralWidget->setLayout(layout);
     centralWidget->setFixedSize(WIDTH, HEIGHT);
     setCentralWidget(centralWidget);
-    setStyleSheet(STYLE);
+    // setStyleSheet(STYLE);
 
     // Connect the button to functions.
-    connect(ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendData);
-    connect(board, &QtBoard::moveInfoReady, this, &MainWindow::sendMousePress);
+    connect(board, &QtBoard::sendMovableQuery, this, &MainWindow::handleMovableQuery);
+    connect(board, &QtBoard::sendEatableQuery, this, &MainWindow::handleEatableQuery);
+    connect(board, &QtBoard::sendMoveInfo, this, &MainWindow::handleMoveInfo);
+    connect(this, &MainWindow::sendEatable, board, &QtBoard::handleEatable);
+    connect(this, &MainWindow::sendMovable, board, &QtBoard::handleMovable);
     connect(ui->tryAgainButton, &QPushButton::clicked, this, &MainWindow::sendTryAgain);
     // connect(giveUpButton, &QPushButton::clicked, this, &MainWindow::handleGiveUp);
     // connect(openChatroomButton, &QPushButton::clicked, this, &MainWindow::handleOpenChatroom);
@@ -88,16 +96,6 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-// send data in this format: M3;2;2;3
-void MainWindow::sendData() {
-    QByteArray data;
-    data.append("$M");
-    data.append(ui->lineEdit1->text().toUtf8());
-    data.append(";");
-    data.append(ui->lineEdit2->text().toUtf8());
-    socket->write(data);
-}
-
 void MainWindow::sendTryAgain() {
     socket->write("$G;");
 }
@@ -112,10 +110,8 @@ void MainWindow::getData() {
         while (true) {
             const auto endPos = data.indexOf('$', 1);
             if (endPos != -1) {
-                QByteArray packet = data.mid(1, endPos - 1);
+                dataHandler(data.mid(1, endPos - 1));
                 data.remove(0, endPos);
-                dataHandler(packet);
-                qDebug() << data;
             } else {
                 data.remove(0, 1);
                 dataHandler(data);
@@ -142,6 +138,15 @@ void MainWindow::dataHandler(const QByteArray &info) {
                     board->setCurrentPlayer(NONE);
             }
             break;
+        case 'R': {
+            QByteArray toSend = info.mid(2, info.length());
+            if (info[1] == 'C') {
+                emit sendEatable(toSend);
+            } else {
+                emit sendMovable(toSend);
+            }
+            break;
+        }
         default:
             board->processBoardInfo(info);
     }
@@ -250,19 +255,28 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
             if (chessColor[row][col] == current_player) {
                 selectedPieceRow = row;
                 selectedPieceCol = col;
+                emit sendEatableQuery(std::make_pair(col, row));
+                emit sendMovableQuery(std::make_pair(col, row));
                 repaint();
             } else {
                 if (selectedPieceRow != -1 && selectedPieceCol != -1) {
                     QString moveInfo = QString("$M%1;%2;%3;%4")
-                            .arg(selectedPieceCol).arg(selectedPieceRow)
-                            .arg(col).arg(row);
-                    std::cout << selectedPieceRow << "," << selectedPieceCol << ";" << row << "," << col << std::endl;
-                    emit moveInfoReady(moveInfo);
+                            .arg(selectedPieceCol).arg(selectedPieceRow).arg(col).arg(row);
+                    emit sendMoveInfo(moveInfo.toUtf8());
+                    qDebug() << moveInfo;
                     selectedPieceRow = selectedPieceCol = -1;
                 }
             }
         }
     }
+}
+
+void QtBoard::handleMovable(const QByteArray &info) {
+    qDebug() << "movable:" << info;
+}
+
+void QtBoard::handleEatable(const QByteArray &info) {
+    qDebug() << "eatable:" << info;
 }
 
 // Handle move mouse event.

@@ -4,7 +4,10 @@
 #include <QMainWindow>
 #include <QTcpSocket>
 #include <QPushButton>
+#include <QLabel>
+#include <QTimer>
 #include "board_utils.h"
+#include "timerThread.h"
 
 namespace Ui {
     class MainWindow;
@@ -28,7 +31,13 @@ private slots:
 
     void sendTryAgain();
 
+    //void processData();
+
     void getData();
+
+    void getTimeData();
+
+    void updateTimeSlot(QString time);
 
     // void handleTryAgain();
     // void handleGiveUp();
@@ -47,6 +56,8 @@ private:
     QTcpSocket *socket;
     QtBoard *board;
     QByteArray msg;
+    QLabel *label=nullptr;
+    //TimerThread *timerThread;
 };
 
 #endif //MAINWINDOW_H

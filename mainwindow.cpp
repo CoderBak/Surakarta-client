@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "timerThread.h"
 #include <Qpainter>
 #include <QMouseEvent>
 #include <iostream>
@@ -44,8 +45,12 @@ MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
         socket(new QTcpSocket(this)),
-        board(new QtBoard(this)) {
+        board(new QtBoard(this)){
     ui->setupUi(this);
+
+    // Set timer
+    label=new QLabel("00::00::00",this);
+    label->move(20,50);
 
     // Set the layout of the interface.
     auto *layout = new QHBoxLayout;
@@ -77,8 +82,10 @@ MainWindow::MainWindow(QWidget *parent) :
     // connect(giveUpButton, &QPushButton::clicked, this, &MainWindow::handleGiveUp);
     // connect(openChatroomButton, &QPushButton::clicked, this, &MainWindow::handleOpenChatroom);
 
+
     // Connect the server.
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
+    //connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getTimeData);
     socket->connectToHost("localhost", PORT);
     if (!socket->waitForConnected()) {
         qDebug() << "Failed to connect to remote host, try to connect localhost";
@@ -100,9 +107,24 @@ void MainWindow::sendTryAgain() {
     socket->write("$G;");
 }
 
+
 // Process data in this function.
 void MainWindow::getData() {
     QByteArray data = socket->readAll();
+
+    if (data.startsWith("$TIME:")) {
+        qDebug() << "Received time from server:" << data;
+        qDebug()<<data;
+        // Extract time data from the received message
+        QByteArray timeData = data.mid(6).trimmed(); // Remove "$TIME:" prefix
+        // qDebug()<<timeData;
+        QString timeString = QString::fromUtf8(timeData);
+
+        // Update the time label on the interface
+        label->setText(timeString);
+        // qDebug() << "Updated time label:" << timeString;
+    }
+
     qDebug() << "Received message from server: " << data;
     if (data[0] != '$') {
         qDebug() << "Wrong format!";
@@ -119,7 +141,31 @@ void MainWindow::getData() {
             }
         }
     }
+
     socket->read(socket->bytesAvailable());
+}
+
+void MainWindow::getTimeData() {
+    QByteArray data = socket->readAll();
+    qDebug() << "Received time from server:" << data;
+    qDebug()<<data;
+    if (data.startsWith("$TIME:")) {
+        // Extract time data from the received message
+        QByteArray timeData = data.mid(5).trimmed(); // Remove "$TIME:" prefix
+        qDebug()<<timeData;
+        QString timeString = QString::fromUtf8(timeData);
+
+        // Update the time label on the interface
+        label->setText(timeString);
+        qDebug() << "Updated time label:" << timeString;
+    }
+}
+
+
+
+void MainWindow::updateTimeSlot(QString time)
+{
+    label->setText(time);
 }
 
 void MainWindow::dataHandler(const QByteArray &info) {

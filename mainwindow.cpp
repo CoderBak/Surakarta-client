@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "timerThread.h"
 #include <Qpainter>
 #include <QMouseEvent>
 #include <iostream>
@@ -45,12 +44,12 @@ MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
         socket(new QTcpSocket(this)),
-        board(new QtBoard(this)){
+        board(new QtBoard(this)) {
     ui->setupUi(this);
 
     // Set timer
-    label=new QLabel("00::00::00",this);
-    label->move(20,50);
+    label = new QLabel("00::00::00", this);
+    label->move(20, 50);
 
     // Set the layout of the interface.
     auto *layout = new QHBoxLayout;
@@ -114,7 +113,7 @@ void MainWindow::getData() {
 
     if (data.startsWith("$TIME:")) {
         qDebug() << "Received time from server:" << data;
-        qDebug()<<data;
+        qDebug() << data;
         // Extract time data from the received message
         QByteArray timeData = data.mid(6).trimmed(); // Remove "$TIME:" prefix
         // qDebug()<<timeData;
@@ -148,11 +147,11 @@ void MainWindow::getData() {
 void MainWindow::getTimeData() {
     QByteArray data = socket->readAll();
     qDebug() << "Received time from server:" << data;
-    qDebug()<<data;
+    qDebug() << data;
     if (data.startsWith("$TIME:")) {
         // Extract time data from the received message
         QByteArray timeData = data.mid(5).trimmed(); // Remove "$TIME:" prefix
-        qDebug()<<timeData;
+        qDebug() << timeData;
         QString timeString = QString::fromUtf8(timeData);
 
         // Update the time label on the interface
@@ -162,9 +161,7 @@ void MainWindow::getTimeData() {
 }
 
 
-
-void MainWindow::updateTimeSlot(QString time)
-{
+void MainWindow::updateTimeSlot(QString time) {
     label->setText(time);
 }
 

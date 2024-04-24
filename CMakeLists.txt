@@ -18,8 +18,6 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         board_utils.h
-        timerThread.h
-        timerThread.cpp
 )
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

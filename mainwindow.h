@@ -7,7 +7,6 @@
 #include <QLabel>
 #include <QTimer>
 #include "board_utils.h"
-#include "timerThread.h"
 
 namespace Ui {
     class MainWindow;
@@ -56,8 +55,7 @@ private:
     QTcpSocket *socket;
     QtBoard *board;
     QByteArray msg;
-    QLabel *label=nullptr;
-    //TimerThread *timerThread;
+    QLabel *label = nullptr;
 };
 
 #endif //MAINWINDOW_H

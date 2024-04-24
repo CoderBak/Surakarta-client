@@ -65,6 +65,8 @@ public:
 
     bool eventFilter(QObject *obj, QEvent *event) override;
 
+    bool rotated;
+
 signals:
 
     void sendMoveInfo(const QByteArray &moveInfo);

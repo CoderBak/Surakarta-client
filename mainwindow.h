@@ -34,8 +34,6 @@ private slots:
 
     void getData();
 
-    void getTimeData();
-
     void updateTimeSlot(QString time);
 
     // void handleTryAgain();

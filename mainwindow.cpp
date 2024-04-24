@@ -110,20 +110,6 @@ void MainWindow::sendTryAgain() {
 // Process data in this function.
 void MainWindow::getData() {
     QByteArray data = socket->readAll();
-
-    if (data.startsWith("$TIME:")) {
-        qDebug() << "Received time from server:" << data;
-        qDebug() << data;
-        // Extract time data from the received message
-        QByteArray timeData = data.mid(6).trimmed(); // Remove "$TIME:" prefix
-        // qDebug()<<timeData;
-        QString timeString = QString::fromUtf8(timeData);
-
-        // Update the time label on the interface
-        label->setText(timeString);
-        // qDebug() << "Updated time label:" << timeString;
-    }
-
     qDebug() << "Received message from server: " << data;
     if (data[0] != '$') {
         qDebug() << "Wrong format!";
@@ -140,26 +126,8 @@ void MainWindow::getData() {
             }
         }
     }
-
     socket->read(socket->bytesAvailable());
 }
-
-void MainWindow::getTimeData() {
-    QByteArray data = socket->readAll();
-    qDebug() << "Received time from server:" << data;
-    qDebug() << data;
-    if (data.startsWith("$TIME:")) {
-        // Extract time data from the received message
-        QByteArray timeData = data.mid(5).trimmed(); // Remove "$TIME:" prefix
-        qDebug() << timeData;
-        QString timeString = QString::fromUtf8(timeData);
-
-        // Update the time label on the interface
-        label->setText(timeString);
-        qDebug() << "Updated time label:" << timeString;
-    }
-}
-
 
 void MainWindow::updateTimeSlot(QString time) {
     label->setText(time);
@@ -189,6 +157,11 @@ void MainWindow::dataHandler(const QByteArray &info) {
                 emit sendMovable(toSend);
             }
             break;
+        }
+        case 'T': {
+            QByteArray timeData = info.mid(5).trimmed(); // Remove "$TIME:" prefix
+            QString timeString = QString::fromUtf8(timeData);
+            label->setText(timeString);
         }
         default:
             board->processBoardInfo(info);

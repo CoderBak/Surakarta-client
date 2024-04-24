@@ -34,7 +34,9 @@ private slots:
 
     void getData();
 
-    void updateTimeSlot(QString time);
+    //void updateTimeSlot(QString time);
+
+    //void resetTime();
 
     // void handleTryAgain();
     // void handleGiveUp();
@@ -53,7 +55,10 @@ private:
     QTcpSocket *socket;
     QtBoard *board;
     QByteArray msg;
-    QLabel *label = nullptr;
+    QLabel *titleTotal = nullptr;
+    QLabel *titleReset = nullptr;
+    QLabel *labelTotal = nullptr;
+    QLabel *labelReset = nullptr;
 };
 
 #endif //MAINWINDOW_H

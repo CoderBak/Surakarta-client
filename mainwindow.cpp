@@ -179,7 +179,14 @@ void MainWindow::dataHandler(const QByteArray &info) {
                 QString timeString = QString::fromUtf8(timeData);
                 labelTotal->setText(timeString);
             }
-
+        }
+        case 'E':{
+            if(info[1]=='T'){
+                qDebug()<<"Time out!";
+            }
+            else if(info[1]=='F'){
+                qDebug()<<"Opponent time out";
+            }
         }
         default:
             board->processBoardInfo(info);

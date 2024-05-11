@@ -7,13 +7,17 @@
 #include <QLabel>
 #include <QTimer>
 #include "board_utils.h"
+#include "NetworkLibrary/networksocket.h"
+#include "NetworkLibrary/networkdata.h"
 
-namespace Ui {
+namespace Ui
+{
     class MainWindow;
 }
 
-class MainWindow : public QMainWindow {
-Q_OBJECT
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -30,13 +34,21 @@ private slots:
 
     void sendTryAgain();
 
-    //void processData();
+    // void processData();
 
     void getData();
 
-    //void updateTimeSlot(QString time);
+    void connectToServer();
 
-    //void resetTime();
+    void connectedSuccessfully();
+
+    void disconnectFromServer();
+
+    // void sendMessage(const QString message);
+
+    // void updateTimeSlot(QString time);
+
+    // void resetTime();
 
     // void handleTryAgain();
     // void handleGiveUp();
@@ -51,7 +63,11 @@ signals:
 private:
     void dataHandler(const QByteArray &info);
 
+    int port = 1233;
+    QString ip = "127.0.0.1";
+
     Ui::MainWindow *ui;
+    NetworkSocket *socket1;
     QTcpSocket *socket;
     QtBoard *board;
     QByteArray msg;
@@ -61,4 +77,4 @@ private:
     QLabel *labelReset = nullptr;
 };
 
-#endif //MAINWINDOW_H
+#endif // MAINWINDOW_H

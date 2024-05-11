@@ -47,6 +47,12 @@ MainWindow::MainWindow(QWidget *parent) :
         board(new QtBoard(this)) {
     ui->setupUi(this);
 
+    socket1=new NetworkSocket(new QTcpSocket(this),this);
+    //if with bottom
+    // connect(socket->base(), &QTcpSocket::connected, this, &MainWindow::connectedSuccessfully);
+    // connect(ui->connect_button, &QPushButton::clicked, this, &MainWindow::connectToServer);
+    // connect(ui->disconnect_button, &QPushButton::clicked, this, &MainWindow::disconnectFromServer);
+
     // Set timer
     titleTotal = new QLabel("Total time",this);
     titleReset = new QLabel("Current Time",this);
@@ -91,6 +97,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Connect the server.
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
     //connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getTimeData);
+
     socket->connectToHost("localhost", PORT);
     if (!socket->waitForConnected()) {
         qDebug() << "Failed to connect to remote host, try to connect localhost";
@@ -134,6 +141,30 @@ void MainWindow::getData() {
     }
     socket->read(socket->bytesAvailable());
 }
+
+void MainWindow::connectToServer()
+{
+    //this->ip = ui->ip_edit->text();
+    //this->port = ui->port_edit->text().toInt();
+    socket1->hello(ip, port);
+    this->socket1->base()->waitForConnected(2000);
+}
+
+void MainWindow::connectedSuccessfully()
+{
+    socket1->send(NetworkData(OPCODE::READY_OP,"","",""));
+}
+
+void MainWindow::disconnectFromServer()
+{
+    socket1->send(NetworkData(OPCODE::LEAVE_OP,"","",""));
+    socket1->bye();
+}
+
+// void MainWindow::sendMessage(const QString message)
+// {
+//     socket1->send(NetworkData(OPCODE::CHAT_OP,"",message,""));
+// }
 
 // void MainWindow::updateTimeSlot(QString time) {
 //     // labelTotal->setText(time);

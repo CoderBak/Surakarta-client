@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QTimer>
 #include "board_utils.h"
+#include <QtWidgets/QLineEdit>
 #include "NetworkLibrary/networksocket.h"
 #include "NetworkLibrary/networkdata.h"
 
@@ -20,6 +21,16 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    QLineEdit *ip_edit;
+    QLineEdit *port_edit;
+    QPushButton *connect_button;
+    QLineEdit *send_edit;
+    QPushButton *send_button;
+    QLineEdit *receive_edit;
+    QLabel *label;
+    QPushButton *disconnect_button;
+    QMenuBar *menubar;
+    QStatusBar *statusbar;
     explicit MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow() override;
@@ -44,7 +55,9 @@ private slots:
 
     void disconnectFromServer();
 
-    // void sendMessage(const QString message);
+    void sendMessage();
+
+    void receiveMessage(NetworkData data);
 
     // void updateTimeSlot(QString time);
 
@@ -65,9 +78,9 @@ private:
 
     int port = 1233;
     QString ip = "127.0.0.1";
-
     Ui::MainWindow *ui;
     NetworkSocket *socket1;
+
     QTcpSocket *socket;
     QtBoard *board;
     QByteArray msg;

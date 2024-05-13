@@ -6,7 +6,7 @@
 
 class ChessPiece {
 public:
-    ChessPiece(const QPoint& position, const QColor& color);
+    ChessPiece(const QPoint &position, const QColor &color);
 
     // 获取棋子位置
     QPoint getPosition() const;
@@ -15,10 +15,10 @@ public:
     QColor getColor() const;
 
     // 设置棋子位置
-    void setPosition(const QPoint& position);
+    void setPosition(const QPoint &position);
 
     // 设置棋子颜色
-    void setColor(const QColor& color);
+    void setColor(const QColor &color);
 
 private:
     QPoint piece_position; // 棋子位置

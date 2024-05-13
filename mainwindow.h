@@ -11,14 +11,12 @@
 #include "NetworkLibrary/networksocket.h"
 #include "NetworkLibrary/networkdata.h"
 
-namespace Ui
-{
+namespace Ui {
     class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+Q_OBJECT
 
 public:
     QLineEdit *ip_edit;
@@ -31,6 +29,7 @@ public:
     QPushButton *disconnect_button;
     QMenuBar *menubar;
     QStatusBar *statusbar;
+
     explicit MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow() override;

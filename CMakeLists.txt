@@ -18,7 +18,8 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         board_utils.h
-	NetworkLibrary/networkdata.cpp
+        pieces.h
+	    NetworkLibrary/networkdata.cpp
         NetworkLibrary/networkdata.h
         NetworkLibrary/networkserver.cpp
         NetworkLibrary/networkserver.h
@@ -30,7 +31,6 @@ if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Surakarta-client
             MANUAL_FINALIZATION
             ${PROJECT_SOURCES}
-            pieces.h
     )
     # Define target properties for Android with Qt 6 as:
     #    set_property(TARGET Surakarta-client APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

@@ -17,8 +17,8 @@ QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
             chessColor[i][j] = ChessColor::NONE;
         }
     }
-    animationTimer=new QTimer(this);
-    connect(animationTimer,&QTimer::timeout,this,&QtBoard::animateMove);
+    animationTimer = new QTimer(this);
+    connect(animationTimer, &QTimer::timeout, this, &QtBoard::animateMove);
 }
 
 QtBoard::~QtBoard() {
@@ -56,6 +56,7 @@ void MainWindow::handleMovableQuery(const posType &pos) {
     QByteArray query = QString("$QN%1;%2").arg(pos.first).arg(pos.second).toUtf8();
     socket->write(query);
 }
+
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
@@ -66,10 +67,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Set timer
 
-    titleTotal = new QLabel("Total time",this);
-    titleReset = new QLabel("Current Time",this);
-    titleTotal->move(10,30);
-    titleReset->move(10,70);
+    titleTotal = new QLabel("Total time", this);
+    titleReset = new QLabel("Current Time", this);
+    titleTotal->move(10, 30);
+    titleReset->move(10, 70);
     labelTotal = new QLabel("00::00::00", this);
     labelTotal->move(10, 50);
     labelReset = new QLabel("00::00::00", this);
@@ -158,8 +159,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->receive_edit->setReadOnly(true);
 
     //connect ui
-    socket1=new NetworkSocket(new QTcpSocket(this),this);
-    connect(socket1->base(), &QTcpSocket::connected, this, &MainWindow::connectedSuccessfully);  // connected 是客户端连接成功后发出的信号
+    socket1 = new NetworkSocket(new QTcpSocket(this), this);
+    connect(socket1->base(), &QTcpSocket::connected, this,
+            &MainWindow::connectedSuccessfully);  // connected 是客户端连接成功后发出的信号
     connect(this->connect_button, &QPushButton::clicked, this, &MainWindow::connectToServer); // 连接服务器
     connect(this->disconnect_button, &QPushButton::clicked, this, &MainWindow::disconnectFromServer); // 断开连接
     connect(this->send_button, &QPushButton::clicked, this, &MainWindow::sendMessage); // 发送消息
@@ -212,7 +214,7 @@ void MainWindow::getData() {
     } else {
         while (true) {
             const auto endPos = data.indexOf('$', 1);
-        if (endPos != -1) {
+            if (endPos != -1) {
                 dataHandler(data.mid(1, endPos - 1));
                 data.remove(0, endPos);
             } else {
@@ -225,28 +227,25 @@ void MainWindow::getData() {
     socket->read(socket->bytesAvailable());
 }
 
-void MainWindow::connectToServer()
-{
+void MainWindow::connectToServer() {
     this->ip = this->ip_edit->text();
     this->port = this->port_edit->text().toInt();
     socket1->hello(ip, port);
     this->socket1->base()->waitForConnected(2000);
 }
 
-void MainWindow::connectedSuccessfully()
-{
+void MainWindow::connectedSuccessfully() {
     this->connect_button->setEnabled(false);
     this->disconnect_button->setEnabled(true);
     this->send_button->setEnabled(true);
     this->port_edit->setReadOnly(true);
     this->ip_edit->setText("Connected");
     this->ip_edit->setReadOnly(true);
-    socket1->send(NetworkData(OPCODE::READY_OP,"","",""));
+    socket1->send(NetworkData(OPCODE::READY_OP, "", "", ""));
 }
 
-void MainWindow::disconnectFromServer()
-{
-    socket1->send(NetworkData(OPCODE::LEAVE_OP,"","",""));
+void MainWindow::disconnectFromServer() {
+    socket1->send(NetworkData(OPCODE::LEAVE_OP, "", "", ""));
     socket1->bye();
     this->connect_button->setEnabled(true);
     this->disconnect_button->setEnabled(false);
@@ -256,15 +255,13 @@ void MainWindow::disconnectFromServer()
     this->ip_edit->setText(ip);
 }
 
-void MainWindow::sendMessage()
-{
+void MainWindow::sendMessage() {
     QString message = this->send_edit->text();
     socket1->send(NetworkData(OPCODE::CHAT_OP, "", message, "")); // 发送消息给服务端，是不是很简单
     this->send_edit->clear();
 }
 
-void MainWindow::receiveMessage(NetworkData data)
-{
+void MainWindow::receiveMessage(NetworkData data) {
     this->receive_edit->setText(data.data2);
 }
 
@@ -301,25 +298,23 @@ void MainWindow::dataHandler(const QByteArray &info) {
         }
         case 'T': {
             QByteArray timeData = info.mid(5).trimmed(); // Remove "$TIME:" prefix
-            if(timeData[0]=='R'){
+            if (timeData[0] == 'R') {
                 //qDebug()<<timeData;
-                timeData=timeData.mid(1).trimmed();
+                timeData = timeData.mid(1).trimmed();
                 QString timeString = QString::fromUtf8(timeData);
                 labelReset->setText(timeString);
-            }
-            else if(timeData[0]=='T'){
+            } else if (timeData[0] == 'T') {
                 //qDebug()<<timeData;
-                timeData=timeData.mid(1).trimmed();
+                timeData = timeData.mid(1).trimmed();
                 QString timeString = QString::fromUtf8(timeData);
                 labelTotal->setText(timeString);
             }
         }
-        case 'E':{
-            if(info[1]=='T'){
-                qDebug()<<"Time out!";
-            }
-            else if(info[1]=='F'){
-                qDebug()<<"Opponent time out";
+        case 'E': {
+            if (info[1] == 'T') {
+                qDebug() << "Time out!";
+            } else if (info[1] == 'F') {
+                qDebug() << "Opponent time out";
             }
         }
         default:
@@ -366,23 +361,24 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
     // }
 
 }
+
 void QtBoard::animateMove() {
-    qDebug () << "HELLO";
+    qDebug() << "HELLO";
     animationTimer->setInterval(50000);
     animationTimer->start();
-    for (const auto& elem : eatable) {
-        const auto& target = elem.first;
+    for (const auto &elem: eatable) {
+        const auto &target = elem.first;
         qDebug() << target.first << target.second;
-        const auto& pieceColor = chessColor[target.second][target.first];
+        const auto &pieceColor = chessColor[target.second][target.first];
         if (pieceColor != current_player && pieceColor != NONE) {
             qDebug() << "OHHHHHHHHHHHHHH" << target.first << target.second;
-            const auto& path = elem.second;
+            const auto &path = elem.second;
             for (int i = 0; i < path.size(); ++i) {
                 // 获取当前位置
                 int row = path[i].first;
                 int col = path[i].second;
-                int start_Row =startRow ;
-                int start_Col =startCol;
+                int start_Row = startRow;
+                int start_Col = startCol;
 
                 // 移动棋子并重绘
                 chessColor[row][col] = current_player;
@@ -392,10 +388,10 @@ void QtBoard::animateMove() {
 
 
                 if (i == path.size() - 1) {
-                        animationTimer->stop();
-                        chessColor[row][col]=ChessColor::NONE;
+                    animationTimer->stop();
+                    chessColor[row][col] = ChessColor::NONE;
 
-                    }
+                }
 
             }
         }
@@ -502,8 +498,8 @@ void QtBoard::paintEvent(QPaintEvent *) {
     for (const auto &elem: movable) {
         emphasize(elem.second, elem.first, MOVABLE_COLOR);
     }
-   //animateMove();
-   drawChess();
+    //animateMove();
+    drawChess();
 }
 
 // Draw all the chess.
@@ -533,12 +529,12 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
             if (chessColor[row][col] == current_player) {
                 selectedPieceRow = row;
                 selectedPieceCol = col;
-                firstSelected=true;
-                startRow=row;
-                startCol=col;
+                firstSelected = true;
+                startRow = row;
+                startCol = col;
                 emit sendEatableQuery(std::make_pair(col, row));
                 emit sendMovableQuery(std::make_pair(col, row));
-               repaint();
+                repaint();
             } else {
                 if (selectedPieceRow != -1 && selectedPieceCol != -1) {
                     QString moveInfo = QString("$M%1;%2;%3;%4")

@@ -30,16 +30,14 @@ constexpr int maxSecond = 1000;
 const QHostAddress serverIP = QHostAddress("20.212.82.172");
 constexpr int PORT = 1233;
 // const QString STYLE = "background-color: white;";
-enum ChessColor
-{
+enum ChessColor {
     WHITE,
     BLACK,
     NONE
 };
 
-class QtBoard : public QWidget
-{
-    Q_OBJECT
+class QtBoard : public QWidget {
+Q_OBJECT
 
 public:
     void setCurrentPlayer(ChessColor cur);
@@ -71,6 +69,7 @@ signals:
     void sendMovableQuery(const posType &pos);
 
 public slots:
+
     void animateMove();
 
     void handleEatable(const QByteArray &);
@@ -87,7 +86,7 @@ private:
     int startCol;
     std::vector<posType> movable;
     std::vector<std::pair<posType, std::vector<posType>>> eatable;
-    QTimer* animationTimer;
+    QTimer *animationTimer;
 
 };
 

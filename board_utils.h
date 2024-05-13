@@ -5,7 +5,7 @@
 #include <QHostAddress>
 
 using posType = std::pair<int, int>;
-constexpr unsigned int BOARD_SIZE = 6;
+constexpr unsigned int BOARD_SIZE = 10;
 constexpr unsigned int maxNoCapture = 40;
 constexpr int WIDTH = 1180;
 constexpr int HEIGHT = 820;
@@ -57,7 +57,7 @@ public:
         }
     }
 
-    ~QtBoard() override = default;
+    ~QtBoard();
 
     void paintEvent(QPaintEvent *) override;
 
@@ -82,6 +82,7 @@ signals:
     void sendMovableQuery(const posType &pos);
 
 public slots:
+    void animateMove();
 
     void handleEatable(const QByteArray &);
 
@@ -92,8 +93,13 @@ private:
     ChessColor current_player;
     int selectedPieceRow = -1;
     int selectedPieceCol = -1;
+    bool firstSelected = 0;
+    int startRow;
+    int startCol;
     std::vector<posType> movable;
     std::vector<std::pair<posType, std::vector<posType>>> eatable;
+    QTimer* animationTimer;
+
 };
 
 #endif // QTBOARD_H

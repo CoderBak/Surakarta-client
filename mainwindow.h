@@ -47,6 +47,8 @@ private slots:
 
     // void processData();
 
+    //void animateMove();
+
     void getData();
 
     void connectToServer();

@@ -7,6 +7,22 @@
 #include <QTextStream>
 #include <QString>
 #include <QCursor>
+#include<QThread>
+QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
+    this->installEventFilter(this);
+    setMouseTracking(true);
+    for (int i = 0; i < BOARD_SIZE; i += 1) {
+        for (int j = 0; j < BOARD_SIZE; j += 1) {
+            chessColor[i][j] = ChessColor::NONE;
+        }
+    }
+    animationTimer=new QTimer(this);
+    connect(animationTimer,&QTimer::timeout,this,&QtBoard::animateMove);
+}
+
+QtBoard::~QtBoard() {
+    delete animationTimer;
+}
 
 bool QtBoard::eventFilter(QObject *obj, QEvent *event) {
     // If the event is a mouse press.
@@ -39,7 +55,6 @@ void MainWindow::handleMovableQuery(const posType &pos) {
     QByteArray query = QString("$QN%1;%2").arg(pos.first).arg(pos.second).toUtf8();
     socket->write(query);
 }
-
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
@@ -150,6 +165,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(socket1, &NetworkSocket::receive, this, &MainWindow::receiveMessage);
 
     // Connect the button to functions.
+
     connect(board, &QtBoard::sendMovableQuery, this, &MainWindow::handleMovableQuery);
     connect(board, &QtBoard::sendEatableQuery, this, &MainWindow::handleEatableQuery);
     connect(board, &QtBoard::sendMoveInfo, this, &MainWindow::handleMoveInfo);
@@ -189,13 +205,13 @@ void MainWindow::sendTryAgain() {
 // Process data in this function.
 void MainWindow::getData() {
     QByteArray data = socket->readAll();
-    qDebug() << "Received message from server: " << data;
+    //qDebug() << "Received message from server: " << data;
     if (data[0] != '$') {
         qDebug() << "Wrong format!";
     } else {
         while (true) {
             const auto endPos = data.indexOf('$', 1);
-            if (endPos != -1) {
+        if (endPos != -1) {
                 dataHandler(data.mid(1, endPos - 1));
                 data.remove(0, endPos);
             } else {
@@ -258,7 +274,7 @@ void MainWindow::receiveMessage(NetworkData data)
 // }
 
 void MainWindow::dataHandler(const QByteArray &info) {
-    qDebug() << "Processing info:" << info;
+    //qDebug() << "Processing info:" << info;
     switch (info[0]) {
         case 'S':
             qDebug() << "I'm player" << info[1];
@@ -338,7 +354,92 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
         }
     }
     // Repaint the board.
+    animateMove();
+    // if(firstSelected){
+    //       repaint();
+    // }
+    // else{
+    //     qDebug()<<"enter";
+    //     animateMove();
+    //     firstSelected=false;
+    // }
+
+}
+void QtBoard::animateMove() {
+    qDebug () << "HELLO";
+    animationTimer->setInterval(50000);
+    animationTimer->start();
+    for (const auto& elem : eatable) {
+        const auto& target = elem.first;
+        qDebug() << target.first << target.second;
+        const auto& pieceColor = chessColor[target.second][target.first];
+        if (pieceColor != current_player && pieceColor != NONE) {
+            qDebug() << "OHHHHHHHHHHHHHH" << target.first << target.second;
+            const auto& path = elem.second;
+            for (int i = 0; i < path.size(); ++i) {
+                // 获取当前位置
+                int row = path[i].first;
+                int col = path[i].second;
+                int start_Row =startRow ;
+                int start_Col =startCol;
+
+                // 移动棋子并重绘
+                chessColor[row][col] = current_player;
+                chessColor[start_Row][start_Col] = ChessColor::NONE;
+                start_Row = row;
+                start_Col = col;
+
+
+                if (i == path.size() - 1) {
+                        animationTimer->stop();
+                        chessColor[row][col]=ChessColor::NONE;
+
+                    }
+
+            }
+        }
+    }
     repaint();
+    /*
+    for (int row = 0; row < BOARD_SIZE; row += 1) {
+        for (int col = 0; col < BOARD_SIZE; col += 1) {
+            chessColor[row][col]
+        }
+    }
+    animationTimer->setInterval(50000);
+    animationTimer->start();
+
+    for (const auto& move : eatable) {
+        auto path = move.second;
+        // 获取起始位置
+        int start_Row =startRow ;
+        int start_Col =startCol;
+
+        // 处理走棋路线
+        for (size_t i = 0; i < path.size(); ++i) {
+            // 获取当前位置
+            int row = path[i].first;
+            int col = path[i].second;
+
+            // 移动棋子并重绘
+            chessColor[row][col] = current_player;
+            chessColor[start_Row][start_Col] = ChessColor::NONE;
+            start_Row = row;
+            start_Col = col;
+
+            // 重绘
+
+            if (i == path.size() - 1) {
+                    animationTimer->stop();
+                    chessColor[row][col]=ChessColor::NONE;
+
+                }
+            repaint();
+        }
+    }*/
+
+
+
 }
 
 // Translate the coordinates.
@@ -400,8 +501,8 @@ void QtBoard::paintEvent(QPaintEvent *) {
     for (const auto &elem: movable) {
         emphasize(elem.second, elem.first, MOVABLE_COLOR);
     }
-
-    drawChess();
+   //animateMove();
+   drawChess();
 }
 
 // Draw all the chess.
@@ -431,9 +532,12 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
             if (chessColor[row][col] == current_player) {
                 selectedPieceRow = row;
                 selectedPieceCol = col;
+                firstSelected=true;
+                startRow=row;
+                startCol=col;
                 emit sendEatableQuery(std::make_pair(col, row));
                 emit sendMovableQuery(std::make_pair(col, row));
-                repaint();
+               repaint();
             } else {
                 if (selectedPieceRow != -1 && selectedPieceCol != -1) {
                     QString moveInfo = QString("$M%1;%2;%3;%4")
@@ -443,6 +547,7 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
                     selectedPieceRow = selectedPieceCol = -1;
                     movable.clear();
                     eatable.clear();
+
                 }
             }
         }

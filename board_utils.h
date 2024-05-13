@@ -44,18 +44,7 @@ class QtBoard : public QWidget
 public:
     void setCurrentPlayer(ChessColor cur);
 
-    explicit QtBoard(QWidget *parent) : QWidget(parent)
-    {
-        this->installEventFilter(this);
-        setMouseTracking(true);
-        for (int i = 0; i < BOARD_SIZE; i += 1)
-        {
-            for (int j = 0; j < BOARD_SIZE; j += 1)
-            {
-                chessColor[i][j] = ChessColor::NONE;
-            }
-        }
-    }
+    explicit QtBoard(QWidget *parent);
 
     ~QtBoard();
 

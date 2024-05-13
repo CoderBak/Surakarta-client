@@ -7,7 +7,8 @@
 #include <QTextStream>
 #include <QString>
 #include <QCursor>
-#include<QThread>
+#include <QThread>
+
 QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
     this->installEventFilter(this);
     setMouseTracking(true);

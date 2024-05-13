@@ -18,6 +18,12 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         board_utils.h
+	NetworkLibrary/networkdata.cpp
+        NetworkLibrary/networkdata.h
+        NetworkLibrary/networkserver.cpp
+        NetworkLibrary/networkserver.h
+        NetworkLibrary/networksocket.cpp
+        NetworkLibrary/networksocket.h
 )
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

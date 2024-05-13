@@ -7,15 +7,30 @@
 #include <QLabel>
 #include <QTimer>
 #include "board_utils.h"
+#include <QtWidgets/QLineEdit>
+#include "NetworkLibrary/networksocket.h"
+#include "NetworkLibrary/networkdata.h"
 
-namespace Ui {
+namespace Ui
+{
     class MainWindow;
 }
 
-class MainWindow : public QMainWindow {
-Q_OBJECT
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
 
 public:
+    QLineEdit *ip_edit;
+    QLineEdit *port_edit;
+    QPushButton *connect_button;
+    QLineEdit *send_edit;
+    QPushButton *send_button;
+    QLineEdit *receive_edit;
+    QLabel *label;
+    QPushButton *disconnect_button;
+    QMenuBar *menubar;
+    QStatusBar *statusbar;
     explicit MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow() override;
@@ -30,15 +45,25 @@ private slots:
 
     void sendTryAgain();
 
-    //void processData();
+    // void processData();
 
     //void animateMove();
 
     void getData();
 
-    //void updateTimeSlot(QString time);
+    void connectToServer();
 
-    //void resetTime();
+    void connectedSuccessfully();
+
+    void disconnectFromServer();
+
+    void sendMessage();
+
+    void receiveMessage(NetworkData data);
+
+    // void updateTimeSlot(QString time);
+
+    // void resetTime();
 
     // void handleTryAgain();
     // void handleGiveUp();
@@ -53,7 +78,11 @@ signals:
 private:
     void dataHandler(const QByteArray &info);
 
+    int port = 1233;
+    QString ip = "127.0.0.1";
     Ui::MainWindow *ui;
+    NetworkSocket *socket1;
+
     QTcpSocket *socket;
     QtBoard *board;
     QByteArray msg;
@@ -63,4 +92,4 @@ private:
     QLabel *labelReset = nullptr;
 };
 
-#endif //MAINWINDOW_H
+#endif // MAINWINDOW_H

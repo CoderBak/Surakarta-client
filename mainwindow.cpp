@@ -59,13 +59,12 @@ MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
         socket(new QTcpSocket(this)),
-        board(new QtBoard(this))
-
-{
+        board(new QtBoard(this)) {
 
     ui->setupUi(this);
 
     // Set timer
+
     titleTotal = new QLabel("Total time",this);
     titleReset = new QLabel("Current Time",this);
     titleTotal->move(10,30);
@@ -95,6 +94,76 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(centralWidget);
     // setStyleSheet(STYLE);
 
+    //initial connect ui
+
+    //connect ui
+    ip_edit = new QLineEdit(centralWidget);
+    ip_edit->setObjectName(QString::fromUtf8("ip_edit"));
+    ip_edit->setGeometry(QRect(10, 230, 111, 20));
+    ip_edit->setAlignment(Qt::AlignCenter);
+
+    port_edit = new QLineEdit(centralWidget);
+    port_edit->setObjectName(QString::fromUtf8("port_edit"));
+    port_edit->setGeometry(QRect(140, 230, 51, 20));
+    port_edit->setAlignment(Qt::AlignCenter);
+
+    connect_button = new QPushButton(centralWidget);
+    connect_button->setObjectName(QString::fromUtf8("connect_button"));
+    connect_button->setGeometry(QRect(210, 230, 80, 20));
+
+    send_edit = new QLineEdit(centralWidget);
+    send_edit->setObjectName(QString::fromUtf8("send_edit"));
+    send_edit->setGeometry(QRect(10, 260, 181, 20));
+    send_edit->setAlignment(Qt::AlignCenter);
+
+    send_button = new QPushButton(centralWidget);
+    send_button->setObjectName(QString::fromUtf8("send_button"));
+    send_button->setGeometry(QRect(210, 260, 81, 21));
+
+    receive_edit = new QLineEdit(centralWidget);
+    receive_edit->setObjectName(QString::fromUtf8("receive_edit"));
+    receive_edit->setGeometry(QRect(10, 290, 181, 20));
+    receive_edit->setAlignment(Qt::AlignCenter);
+
+    label = new QLabel(centralWidget);
+    label->setObjectName(QString::fromUtf8("label"));
+    label->setGeometry(QRect(210, 290, 81, 16));
+    label->setAlignment(Qt::AlignCenter);
+
+    disconnect_button = new QPushButton(centralWidget);
+    disconnect_button->setObjectName(QString::fromUtf8("disconnect_button"));
+    disconnect_button->setGeometry(QRect(10, 320, 281, 21));
+
+
+    // menubar = new QMenuBar(MainWindow);
+    // menubar->setObjectName(QString::fromUtf8("menubar"));
+    // menubar->setGeometry(QRect(0, 0, 346, 17));
+    // MainWindow->setMenuBar(menubar);
+    // statusbar = new QStatusBar(MainWindow);
+    // statusbar->setObjectName(QString::fromUtf8("statusbar"));
+    // MainWindow->setStatusBar(statusbar);
+
+    connect_button->setText(QCoreApplication::translate("MainWindow", "Connect", nullptr));
+    send_button->setText(QCoreApplication::translate("MainWindow", "Send", nullptr));
+    label->setText(QCoreApplication::translate("MainWindow", "Receive", nullptr));
+    disconnect_button->setText(QCoreApplication::translate("MainWindow", "Disconnect", nullptr));
+
+
+    //initial ui
+    this->ip_edit->setText(ip);
+    this->port_edit->setText(QString::number(port));
+    this->send_button->setEnabled(false);
+    this->disconnect_button->setEnabled(false);
+    this->receive_edit->setReadOnly(true);
+
+    //connect ui
+    socket1=new NetworkSocket(new QTcpSocket(this),this);
+    connect(socket1->base(), &QTcpSocket::connected, this, &MainWindow::connectedSuccessfully);  // connected 是客户端连接成功后发出的信号
+    connect(this->connect_button, &QPushButton::clicked, this, &MainWindow::connectToServer); // 连接服务器
+    connect(this->disconnect_button, &QPushButton::clicked, this, &MainWindow::disconnectFromServer); // 断开连接
+    connect(this->send_button, &QPushButton::clicked, this, &MainWindow::sendMessage); // 发送消息
+    connect(socket1, &NetworkSocket::receive, this, &MainWindow::receiveMessage);
+
     // Connect the button to functions.
 
     connect(board, &QtBoard::sendMovableQuery, this, &MainWindow::handleMovableQuery);
@@ -106,10 +175,10 @@ MainWindow::MainWindow(QWidget *parent) :
     // connect(giveUpButton, &QPushButton::clicked, this, &MainWindow::handleGiveUp);
     // connect(openChatroomButton, &QPushButton::clicked, this, &MainWindow::handleOpenChatroom);
 
-
     // Connect the server.
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
     //connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getTimeData);
+
     socket->connectToHost("localhost", PORT);
     if (!socket->waitForConnected()) {
         qDebug() << "Failed to connect to remote host, try to connect localhost";
@@ -125,6 +194,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow() {
     delete ui;
+    delete socket1;
 }
 
 void MainWindow::sendTryAgain() {
@@ -153,6 +223,50 @@ void MainWindow::getData() {
     }
     socket->read(socket->bytesAvailable());
 }
+
+void MainWindow::connectToServer()
+{
+    this->ip = this->ip_edit->text();
+    this->port = this->port_edit->text().toInt();
+    socket1->hello(ip, port);
+    this->socket1->base()->waitForConnected(2000);
+}
+
+void MainWindow::connectedSuccessfully()
+{
+    this->connect_button->setEnabled(false);
+    this->disconnect_button->setEnabled(true);
+    this->send_button->setEnabled(true);
+    this->port_edit->setReadOnly(true);
+    this->ip_edit->setText("Connected");
+    this->ip_edit->setReadOnly(true);
+    socket1->send(NetworkData(OPCODE::READY_OP,"","",""));
+}
+
+void MainWindow::disconnectFromServer()
+{
+    socket1->send(NetworkData(OPCODE::LEAVE_OP,"","",""));
+    socket1->bye();
+    this->connect_button->setEnabled(true);
+    this->disconnect_button->setEnabled(false);
+    this->send_button->setEnabled(false);
+    this->port_edit->setReadOnly(false);
+    this->ip_edit->setReadOnly(false);
+    this->ip_edit->setText(ip);
+}
+
+void MainWindow::sendMessage()
+{
+    QString message = this->send_edit->text();
+    socket1->send(NetworkData(OPCODE::CHAT_OP, "", message, "")); // 发送消息给服务端，是不是很简单
+    this->send_edit->clear();
+}
+
+void MainWindow::receiveMessage(NetworkData data)
+{
+    this->receive_edit->setText(data.data2);
+}
+
 
 // void MainWindow::updateTimeSlot(QString time) {
 //     // labelTotal->setText(time);

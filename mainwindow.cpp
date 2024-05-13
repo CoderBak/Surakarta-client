@@ -66,8 +66,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Set timer
-    label = new QLabel("00::00::00", this);
-    label->move(20, 50);
+    titleTotal = new QLabel("Total time",this);
+    titleReset = new QLabel("Current Time",this);
+    titleTotal->move(10,30);
+    titleReset->move(10,70);
+    labelTotal = new QLabel("00::00::00", this);
+    labelTotal->move(10, 50);
+    labelReset = new QLabel("00::00::00", this);
+    labelReset->move(10, 90);
 
     // Set the layout of the interface.
     auto *layout = new QHBoxLayout;
@@ -148,9 +154,10 @@ void MainWindow::getData() {
     socket->read(socket->bytesAvailable());
 }
 
-void MainWindow::updateTimeSlot(QString time) {
-    label->setText(time);
-}
+// void MainWindow::updateTimeSlot(QString time) {
+//     // labelTotal->setText(time);
+//     // labelReset->setText(time);
+// }
 
 void MainWindow::dataHandler(const QByteArray &info) {
     //qDebug() << "Processing info:" << info;
@@ -179,8 +186,26 @@ void MainWindow::dataHandler(const QByteArray &info) {
         }
         case 'T': {
             QByteArray timeData = info.mid(5).trimmed(); // Remove "$TIME:" prefix
-            QString timeString = QString::fromUtf8(timeData);
-            label->setText(timeString);
+            if(timeData[0]=='R'){
+                //qDebug()<<timeData;
+                timeData=timeData.mid(1).trimmed();
+                QString timeString = QString::fromUtf8(timeData);
+                labelReset->setText(timeString);
+            }
+            else if(timeData[0]=='T'){
+                //qDebug()<<timeData;
+                timeData=timeData.mid(1).trimmed();
+                QString timeString = QString::fromUtf8(timeData);
+                labelTotal->setText(timeString);
+            }
+        }
+        case 'E':{
+            if(info[1]=='T'){
+                qDebug()<<"Time out!";
+            }
+            else if(info[1]=='F'){
+                qDebug()<<"Opponent time out";
+            }
         }
         default:
             board->processBoardInfo(info);

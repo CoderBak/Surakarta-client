@@ -26,22 +26,36 @@ constexpr auto EATABLE_COLOR = Qt::blue;
 constexpr auto MOVABLE_COLOR = Qt::green;
 constexpr auto EATABLE_PATH_COLOR = Qt::yellow;
 constexpr int selectedSize = 5;
+constexpr int maxSecond = 15;
 const QHostAddress serverIP = QHostAddress("20.212.82.172");
 constexpr int PORT = 1233;
 // const QString STYLE = "background-color: white;";
-enum ChessColor {
+enum ChessColor
+{
     WHITE,
     BLACK,
     NONE
 };
 
-class QtBoard : public QWidget {
-Q_OBJECT
+class QtBoard : public QWidget
+{
+    Q_OBJECT
 
 public:
     void setCurrentPlayer(ChessColor cur);
 
-    explicit QtBoard(QWidget *parent);
+    explicit QtBoard(QWidget *parent) : QWidget(parent)
+    {
+        this->installEventFilter(this);
+        setMouseTracking(true);
+        for (int i = 0; i < BOARD_SIZE; i += 1)
+        {
+            for (int j = 0; j < BOARD_SIZE; j += 1)
+            {
+                chessColor[i][j] = ChessColor::NONE;
+            }
+        }
+    }
 
     ~QtBoard();
 

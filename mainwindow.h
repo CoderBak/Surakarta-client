@@ -32,6 +32,8 @@ private slots:
 
     //void processData();
 
+    //void animateMove();
+
     void getData();
 
     //void updateTimeSlot(QString time);

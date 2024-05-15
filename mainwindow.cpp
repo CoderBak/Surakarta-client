@@ -7,22 +7,23 @@
 #include <QTextStream>
 #include <QString>
 #include <QCursor>
+#include <QMenuBar>
+#include <QStatusBar>
 #include <QThread>
 
 QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
     this->installEventFilter(this);
     setMouseTracking(true);
-    for (int i = 0; i < BOARD_SIZE; i += 1) {
-        for (int j = 0; j < BOARD_SIZE; j += 1) {
-            chessColor[i][j] = ChessColor::NONE;
+    for (unsigned int i = 0; i < BOARD_SIZE; i += 1) {
+        for (unsigned int j = 0; j < BOARD_SIZE; j += 1) {
+            chessColor[i][j] = NONE;
         }
     }
-    animationTimer = new QTimer(this);
-    connect(animationTimer, &QTimer::timeout, this, &QtBoard::animateMove);
+
 }
 
 QtBoard::~QtBoard() {
-    delete animationTimer;
+    //delete animationTimer;
 }
 
 bool QtBoard::eventFilter(QObject *obj, QEvent *event) {
@@ -99,52 +100,61 @@ MainWindow::MainWindow(QWidget *parent) :
     //initial connect ui
 
     //connect ui
-    ip_edit = new QLineEdit(centralWidget);
+    /*
+    ip_edit = new QLineEdit(this);
     ip_edit->setObjectName(QString::fromUtf8("ip_edit"));
     ip_edit->setGeometry(QRect(10, 230, 111, 20));
     ip_edit->setAlignment(Qt::AlignCenter);
+    menu->addWidget(ip_edit);
 
-    port_edit = new QLineEdit(centralWidget);
+    port_edit = new QLineEdit(this);
     port_edit->setObjectName(QString::fromUtf8("port_edit"));
     port_edit->setGeometry(QRect(140, 230, 51, 20));
     port_edit->setAlignment(Qt::AlignCenter);
+    menu->addWidget(port_edit);
 
-    connect_button = new QPushButton(centralWidget);
+    connect_button = new QPushButton(this);
     connect_button->setObjectName(QString::fromUtf8("connect_button"));
     connect_button->setGeometry(QRect(210, 230, 80, 20));
+    menu->addWidget(connect_button);
 
-    send_edit = new QLineEdit(centralWidget);
+    send_edit = new QLineEdit(this);
     send_edit->setObjectName(QString::fromUtf8("send_edit"));
     send_edit->setGeometry(QRect(10, 260, 181, 20));
     send_edit->setAlignment(Qt::AlignCenter);
+    menu->addWidget(send_edit);
 
-    send_button = new QPushButton(centralWidget);
+    send_button = new QPushButton(this);
     send_button->setObjectName(QString::fromUtf8("send_button"));
     send_button->setGeometry(QRect(210, 260, 81, 21));
+    menu->addWidget(send_button);
 
-    receive_edit = new QLineEdit(centralWidget);
+    receive_edit = new QLineEdit(this);
     receive_edit->setObjectName(QString::fromUtf8("receive_edit"));
     receive_edit->setGeometry(QRect(10, 290, 181, 20));
     receive_edit->setAlignment(Qt::AlignCenter);
+    menu->addWidget(receive_edit);
 
-    label = new QLabel(centralWidget);
+    label = new QLabel(this);
     label->setObjectName(QString::fromUtf8("label"));
     label->setGeometry(QRect(210, 290, 81, 16));
     label->setAlignment(Qt::AlignCenter);
+    menu->addWidget(label);
 
-    disconnect_button = new QPushButton(centralWidget);
+    disconnect_button = new QPushButton(this);
     disconnect_button->setObjectName(QString::fromUtf8("disconnect_button"));
     disconnect_button->setGeometry(QRect(10, 320, 281, 21));
+    menu->addWidget(disconnect_button);*/
 
 
-    // menubar = new QMenuBar(MainWindow);
-    // menubar->setObjectName(QString::fromUtf8("menubar"));
-    // menubar->setGeometry(QRect(0, 0, 346, 17));
-    // MainWindow->setMenuBar(menubar);
-    // statusbar = new QStatusBar(MainWindow);
-    // statusbar->setObjectName(QString::fromUtf8("statusbar"));
-    // MainWindow->setStatusBar(statusbar);
+    //menubar = new QMenuBar(this);
+    //setMenuBar(menubar);
+    //menu->addWidget(menubar);
 
+    //statusbar = new QStatusBar(this);
+    //setStatusBar(statusbar);
+    //menu->addWidget(statusbar);
+/*
     connect_button->setText(QCoreApplication::translate("MainWindow", "Connect", nullptr));
     send_button->setText(QCoreApplication::translate("MainWindow", "Send", nullptr));
     label->setText(QCoreApplication::translate("MainWindow", "Receive", nullptr));
@@ -165,7 +175,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->connect_button, &QPushButton::clicked, this, &MainWindow::connectToServer); // 连接服务器
     connect(this->disconnect_button, &QPushButton::clicked, this, &MainWindow::disconnectFromServer); // 断开连接
     connect(this->send_button, &QPushButton::clicked, this, &MainWindow::sendMessage); // 发送消息
-    connect(socket1, &NetworkSocket::receive, this, &MainWindow::receiveMessage);
+    connect(socket1, &NetworkSocket::receive, this, &MainWindow::receiveMessage);*/
 
     // Connect the button to functions.
 
@@ -197,7 +207,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow() {
     delete ui;
-    delete socket1;
 }
 
 void MainWindow::sendTryAgain() {
@@ -208,7 +217,7 @@ void MainWindow::sendTryAgain() {
 // Process data in this function.
 void MainWindow::getData() {
     QByteArray data = socket->readAll();
-    //qDebug() << "Received message from server: " << data;
+    // qDebug() << "Received message from server: " << data;
     if (data[0] != '$') {
         qDebug() << "Wrong format!";
     } else {
@@ -272,9 +281,11 @@ void MainWindow::receiveMessage(NetworkData data) {
 // }
 
 void MainWindow::dataHandler(const QByteArray &info) {
-    //qDebug() << "Processing info:" << info;
+    if (info[0] != 'T') {
+        qDebug() << "Processing info:" << info;
+    }
     switch (info[0]) {
-        case 'S':
+        case 'S': {
             qDebug() << "I'm player" << info[1];
             switch (info[1]) {
                 case 'B':
@@ -287,6 +298,7 @@ void MainWindow::dataHandler(const QByteArray &info) {
                     board->setCurrentPlayer(NONE);
             }
             break;
+        }
         case 'R': {
             QByteArray toSend = info.mid(2, info.length());
             if (info[1] == 'C') {
@@ -309,6 +321,7 @@ void MainWindow::dataHandler(const QByteArray &info) {
                 QString timeString = QString::fromUtf8(timeData);
                 labelTotal->setText(timeString);
             }
+            break;
         }
         case 'E': {
             if (info[1] == 'T') {
@@ -316,14 +329,20 @@ void MainWindow::dataHandler(const QByteArray &info) {
             } else if (info[1] == 'F') {
                 qDebug() << "Opponent time out";
             }
+            break;
+        }
+        case 'B': {
+            board->processBoardInfo(info);
+            break;
         }
         default:
-            board->processBoardInfo(info);
+            return;
     }
 }
 
 // Process boardInfo in this function.
 void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
+    qDebug () << "PROCESSING BOARD";
     QString boardInfoStr = QString::fromUtf8(boardInfo);
     QStringList rows = boardInfoStr.split('\n');
     for (int row = 0; row < BOARD_SIZE; row += 1) {
@@ -349,94 +368,58 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
             }
         }
     }
-    // Repaint the board.
+    // Animation & repaint
     animateMove();
-    // if(firstSelected){
-    //       repaint();
-    // }
-    // else{
-    //     qDebug()<<"enter";
-    //     animateMove();
-    //     firstSelected=false;
-    // }
-
 }
 
 void QtBoard::animateMove() {
-    qDebug() << "HELLO";
-    animationTimer->setInterval(50000);
-    animationTimer->start();
+    bool isEatableFound = false;
+    currentPath = nullptr;
+    if (eatable.empty()) {
+        repaint();
+        return;
+    }
     for (const auto &elem: eatable) {
         const auto &target = elem.first;
-        qDebug() << target.first << target.second;
-        const auto &pieceColor = chessColor[target.second][target.first];
-        if (pieceColor != current_player && pieceColor != NONE) {
-            qDebug() << "OHHHHHHHHHHHHHH" << target.first << target.second;
-            const auto &path = elem.second;
-            for (int i = 0; i < path.size(); ++i) {
-                // 获取当前位置
-                int row = path[i].first;
-                int col = path[i].second;
-                int start_Row = startRow;
-                int start_Col = startCol;
-
-                // 移动棋子并重绘
-                chessColor[row][col] = current_player;
-                chessColor[start_Row][start_Col] = ChessColor::NONE;
-                start_Row = row;
-                start_Col = col;
-
-
-                if (i == path.size() - 1) {
-                    animationTimer->stop();
-                    chessColor[row][col] = ChessColor::NONE;
-
-                }
-
-            }
+        const auto pieceColor = chessColor[target.first][target.second];
+        if (pieceColor == current_player) {
+            lastRow = lastCol = -1;
+            currentPath = &(elem.second);
+            currentPathIndex = 0;
+            isEatableFound = true;
+            chessColor[target.first][target.second] = (pieceColor == WHITE) ? BLACK : WHITE;
+            break;
         }
     }
-    repaint();
-    /*
-    for (int row = 0; row < BOARD_SIZE; row += 1) {
-        for (int col = 0; col < BOARD_SIZE; col += 1) {
-            chessColor[row][col]
-        }
+    if (isEatableFound) {
+        animationTimer = new QTimer(this);
+        connect(animationTimer, &QTimer::timeout, this, &QtBoard::animationStep);
+        animationTimer->setInterval(1000);
+        animationTimer->start();
+    } else {
+        repaint();
     }
-    animationTimer->setInterval(50000);
-    animationTimer->start();
+}
 
-    for (const auto& move : eatable) {
-        auto path = move.second;
-        // 获取起始位置
-        int start_Row =startRow ;
-        int start_Col =startCol;
-
-        // 处理走棋路线
-        for (size_t i = 0; i < path.size(); ++i) {
-            // 获取当前位置
-            int row = path[i].first;
-            int col = path[i].second;
-
-            // 移动棋子并重绘
-            chessColor[row][col] = current_player;
-            chessColor[start_Row][start_Col] = ChessColor::NONE;
-            start_Row = row;
-            start_Col = col;
-
-            // 重绘
-
-            if (i == path.size() - 1) {
-                    animationTimer->stop();
-                    chessColor[row][col]=ChessColor::NONE;
-
-                }
-            repaint();
+void QtBoard::animationStep() {
+    if (currentPathIndex < currentPath->size()) {
+        if (lastRow != -1 && lastCol != -1) {
+            chessColor[lastRow][lastCol] = NONE;
         }
-    }*/
-
-
-
+        const auto [row, col] = (*currentPath)[currentPathIndex];
+        chessColor[row][col] = current_player;
+        lastRow = row;
+        lastCol = col;
+        repaint();
+        currentPathIndex += 1;
+    } else {
+        animationTimer->stop();
+        disconnect(animationTimer, &QTimer::timeout, this, &QtBoard::animationStep);
+        currentPathIndex = 0;
+        currentPath = nullptr;
+        eatable.clear();
+        repaint();
+    }
 }
 
 // Translate the coordinates.
@@ -484,21 +467,15 @@ void QtBoard::paintEvent(QPaintEvent *) {
     // Show the chess at clicked.
     if (selectedPieceRow != -1 && selectedPieceCol != -1) {
         emphasize(selectedPieceCol, selectedPieceRow, SELECTED_COLOR);
-    }
-
-    // Show the eatable
-    for (const auto &elem: eatable) {
-        emphasize(elem.first.second, elem.first.first, EATABLE_COLOR);
-        for (const auto &item: elem.second) {
-            emphasize(item.second, item.first, EATABLE_PATH_COLOR);
+        // Show the eatable
+        for (const auto &elem: eatable) {
+            emphasize(elem.first.second, elem.first.first, EATABLE_COLOR);
+        }
+        // Show the movable
+        for (const auto &elem: movable) {
+            emphasize(elem.second, elem.first, MOVABLE_COLOR);
         }
     }
-
-    // Show the movable
-    for (const auto &elem: movable) {
-        emphasize(elem.second, elem.first, MOVABLE_COLOR);
-    }
-    //animateMove();
     drawChess();
 }
 
@@ -530,8 +507,8 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
                 selectedPieceRow = row;
                 selectedPieceCol = col;
                 firstSelected = true;
-                startRow = row;
-                startCol = col;
+                eatable.clear();
+                movable.clear();
                 emit sendEatableQuery(std::make_pair(col, row));
                 emit sendMovableQuery(std::make_pair(col, row));
                 repaint();
@@ -539,12 +516,10 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
                 if (selectedPieceRow != -1 && selectedPieceCol != -1) {
                     QString moveInfo = QString("$M%1;%2;%3;%4")
                             .arg(selectedPieceCol).arg(selectedPieceRow).arg(col).arg(row);
-                    emit sendMoveInfo(moveInfo.toUtf8());
-                    qDebug() << moveInfo;
                     selectedPieceRow = selectedPieceCol = -1;
-                    movable.clear();
-                    eatable.clear();
-
+                    emit sendMoveInfo(moveInfo.toUtf8());
+                    repaint();
+                    //movable.clear();
                 }
             }
         }
@@ -593,7 +568,6 @@ void QtBoard::handleEatable(const QByteArray &info) {
                     generatedPath.push_back(unzip());
                 }
             }
-            generatedPath.pop_back();
             eatable.emplace_back(target, generatedPath);
         }
     }

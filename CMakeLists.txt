@@ -18,8 +18,7 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         board_utils.h
-        pieces.h
-	    NetworkLibrary/networkdata.cpp
+        NetworkLibrary/networkdata.cpp
         NetworkLibrary/networkdata.h
         NetworkLibrary/networkserver.cpp
         NetworkLibrary/networkserver.h

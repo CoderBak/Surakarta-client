@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QHostAddress>
+#include <QMutex>
 
 using posType = std::pair<int, int>;
 constexpr unsigned int BOARD_SIZE = 10;
@@ -60,6 +61,8 @@ public:
 
     bool rotated;
 
+    void animationStep();
+
 signals:
 
     void sendMoveInfo(const QByteArray &moveInfo);
@@ -81,13 +84,15 @@ private:
     ChessColor current_player;
     int selectedPieceRow = -1;
     int selectedPieceCol = -1;
-    bool firstSelected = 0;
-    int startRow;
-    int startCol;
+    bool firstSelected = false;
     std::vector<posType> movable;
     std::vector<std::pair<posType, std::vector<posType>>> eatable;
     QTimer *animationTimer;
-
+    QMutex animationMutex;
+    int currentPathIndex;
+    int lastRow, lastCol;
+    const std::vector<posType>* currentPath;
+    bool inAnimation = false;
 };
 
 #endif // QTBOARD_H

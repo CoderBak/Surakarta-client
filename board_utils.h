@@ -17,7 +17,7 @@ constexpr int cellSize = BOARD_HEIGHT / BOARD_SIZE;
 constexpr int PEN_WIDTH = 2;
 constexpr auto PATH_COLOR = QColor(173, 216, 230);
 constexpr auto DEFAULT_COLOR = Qt::black;
-constexpr auto BACK_COLOR = QColor(255, 255, 245);
+constexpr auto BACK_COLOR = QColor(255, 255, 240);
 constexpr int chessRadius = static_cast<int>(0.35 * cellSize);
 constexpr auto BLACK_COLOR = Qt::black;
 constexpr auto WHITE_COLOR = Qt::white;
@@ -26,6 +26,7 @@ constexpr auto SELECTED_COLOR = Qt::red;
 constexpr Qt::GlobalColor EATABLE_COLOR = Qt::darkBlue;
 constexpr auto MOVABLE_COLOR = Qt::green;
 constexpr auto ANIMATION_PER_TIME = 500;
+constexpr auto ANIMATION_STEP = 100;
 // constexpr auto EATABLE_PATH_COLOR = Qt::yellow;
 constexpr int selectedSize = 5;
 constexpr int emphasizeSize = 3;
@@ -90,7 +91,6 @@ private:
     ChessColor current_player;
     int selectedPieceRow = -1;
     int selectedPieceCol = -1;
-    bool firstSelected = false;
     std::vector<posType> movable;
     std::vector<std::pair<posType, std::vector<posType>>> eatable;
     QTimer *animationTimer;
@@ -101,6 +101,8 @@ private:
     const std::vector<posType>* currentPath;
     bool inAnimation = false;
     bool shouldCheckAnimation = false;
+    int extraX = -1, extraY = -1;
+    int currentStep;
 };
 
 #endif // QTBOARD_H

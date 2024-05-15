@@ -273,7 +273,6 @@ void MainWindow::receiveMessage(NetworkData data) {
     this->receive_edit->setText(data.data2);
 }
 
-
 // void MainWindow::updateTimeSlot(QString time) {
 //     // labelTotal->setText(time);
 //     // labelReset->setText(time);
@@ -331,7 +330,7 @@ void MainWindow::dataHandler(const QByteArray &info) {
             break;
         }
         case 'B': {
-            board->processBoardInfo(info);
+            board->processBoardInfo(info.mid(1));
             break;
         }
         default:
@@ -383,47 +382,28 @@ void QtBoard::animateMove() {
         repaint();
         return;
     }
-    for (const auto &elem: eatable) {
-        const auto &target = elem.first;
-        const auto pieceColor = chessColor[target.first][target.second];
-        if (pieceColor == current_player) {
-            lastRow = lastCol = -1;
-            currentPath = &(elem.second);
-            currentPathIndex = 0;
-            isEatableFound = true;
-            chessColor[target.first][target.second] = (pieceColor == WHITE) ? BLACK : WHITE;
-            break;
+    if (currentPath == nullptr) {
+        for (const auto &elem: eatable) {
+            const auto &target = elem.first;
+            const auto pieceColor = chessColor[target.first][target.second];
+            if (pieceColor == current_player) {
+                lastRow = fromRow;
+                lastCol = fromCol;
+                currentPath = &(elem.second);
+                currentPathIndex = 0;
+                isEatableFound = true;
+                chessColor[target.first][target.second] = (pieceColor == WHITE) ? BLACK : WHITE;
+                break;
+            }
         }
     }
-    if (isEatableFound) {
+    if (currentPath != nullptr || isEatableFound) {
         inAnimation = true;
         animationTimer = new QTimer(this);
         connect(animationTimer, &QTimer::timeout, this, &QtBoard::animationStep);
-        animationTimer->setInterval(ANIMATION_PER_TIME);
+        animationTimer->setInterval(ANIMATION_PER_TIME / ANIMATION_STEP);
         animationTimer->start();
     } else {
-        repaint();
-    }
-}
-
-void QtBoard::animationStep() {
-    if (currentPathIndex < currentPath->size()) {
-        if (lastRow != -1 && lastCol != -1) {
-            chessColor[lastRow][lastCol] = NONE;
-        }
-        const auto [row, col] = (*currentPath)[currentPathIndex];
-        chessColor[row][col] = current_player;
-        lastRow = row;
-        lastCol = col;
-        repaint();
-        currentPathIndex += 1;
-    } else {
-        animationTimer->stop();
-        disconnect(animationTimer, &QTimer::timeout, this, &QtBoard::animationStep);
-        currentPathIndex = 0;
-        currentPath = nullptr;
-        eatable.clear();
-        inAnimation = false;
         repaint();
     }
 }
@@ -431,6 +411,103 @@ void QtBoard::animationStep() {
 // Translate the coordinates.
 std::pair<int, int> translateIdx(const unsigned int x, const unsigned int y) {
     return std::make_pair(DELTA_X + x * cellSize + cellSize / 2, DELTA_Y + y * cellSize + cellSize / 2);
+}
+
+auto calculateRotation = [](auto step, auto row, auto col) {
+    int centerX, centerY, layer;
+    double angle = step * 1.0 / ANIMATION_STEP * 270;
+    const int x = std::abs(row - col), n = BOARD_SIZE;
+    // 1 = 逆时针
+    if (row == n - 1 && col < n / 2 || col == 0 && row >= n / 2) {
+        centerX = DELTA_X;
+        centerY = DELTA_Y + BOARD_HEIGHT;
+        layer = n - x;
+        // 逆时针
+        if (row != n - 1) {
+            angle = 90 + angle;
+        } else {
+            angle = -angle;
+        }
+    }
+    if (row == n - 1 && col >= n / 2 || col == n - 1 && row >= n / 2) {
+        centerX = DELTA_X + BOARD_HEIGHT;
+        centerY = DELTA_Y + BOARD_HEIGHT;
+        layer = x + 1;
+        // 逆时针
+        if (row == n - 1) {
+            angle = 180 + angle;
+        } else {
+            angle = 90 - angle;
+        }
+    }
+    if (row == 0 && col < n / 2 || col == 0 && row < n / 2) {
+        centerX = DELTA_X;
+        centerY = DELTA_Y;
+        layer = x + 1;
+        // 逆时针
+        if (row == 0) {
+            angle = angle;
+        } else {
+            angle = 270 - angle;
+        }
+    }
+    if (row == 0 && col >= n / 2 || col == n - 1 && row < n / 2) {
+        centerX = DELTA_X + BOARD_HEIGHT;
+        centerY = DELTA_Y;
+        layer = x + 1;
+        // 逆时针
+        if (row != 0) {
+            angle = 270 + angle;
+        } else {
+            angle = 180 - angle;
+        }
+    }
+    const double radius = cellSize * layer - cellSize * 1.0 / 2;
+    centerX = centerX + static_cast<int>(radius * std::cos(angle * M_PI / 180));
+    centerY = centerY - static_cast<int>(radius * std::sin(angle * M_PI / 180));
+    return std::make_pair(centerX, centerY);
+};
+
+void QtBoard::animationStep() {
+    if (currentPathIndex < currentPath->size()) {
+        if (lastRow != -1 && lastCol != -1) {
+            chessColor[lastRow][lastCol] = NONE;
+        }
+        const auto [row, col] = (*currentPath)[currentPathIndex];
+        if ((row - lastRow) * (col - lastCol) == 0) {
+            const auto [u, v] = translateIdx(lastCol, lastRow);
+            const auto [s, t] = translateIdx(col, row);
+            extraX = u + static_cast<int>((s - u) * currentStep * 1.0 / ANIMATION_STEP);
+            extraY = v + static_cast<int>((t - v) * currentStep * 1.0 / ANIMATION_STEP);
+            repaint();
+            extraX = -1;
+            extraY = -1;
+        } else {
+            const auto [centerX, centerY] = calculateRotation(currentStep, lastRow, lastCol);
+            extraX = centerX;
+            extraY = centerY;
+            repaint();
+            extraX = -1;
+            extraY = -1;
+        }
+        currentStep += 1;
+        if (currentStep > ANIMATION_STEP) {
+            chessColor[row][col] = current_player;
+            lastRow = row;
+            lastCol = col;
+            currentPathIndex += 1;
+            currentStep = 1;
+        }
+    } else {
+        animationTimer->stop();
+        disconnect(animationTimer, &QTimer::timeout, this, &QtBoard::animationStep);
+        currentPathIndex = 0;
+        currentPath = nullptr;
+        eatable.clear();
+        inAnimation = false;
+        currentStep = 1;
+        repaint();
+    }
 }
 
 // Draw arcs at corner.
@@ -565,6 +642,13 @@ void QtBoard::drawChess() {
             }
         }
     }
+    if (extraX != -1 && extraY != -1) {
+        const auto currentColor = (current_player == BLACK) ? Qt::black : Qt::white;
+        painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH));
+        painter.setBrush(QBrush(currentColor, Qt::SolidPattern));
+        const QRect rect(extraX - chessRadius, extraY - chessRadius, 2 * chessRadius, 2 * chessRadius);
+        painter.drawEllipse(rect);
+    }
 }
 
 // Handle mouse press event.
@@ -577,7 +661,6 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
             if (chessColor[row][col] == current_player) {
                 selectedPieceRow = row;
                 selectedPieceCol = col;
-                firstSelected = true;
                 eatable.clear();
                 movable.clear();
                 emit sendEatableQuery(std::make_pair(col, row));

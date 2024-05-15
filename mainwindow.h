@@ -10,7 +10,7 @@
 #include <QtWidgets/QLineEdit>
 #include "NetworkLibrary/networksocket.h"
 #include "NetworkLibrary/networkdata.h"
-
+#include "startmenu.h"
 namespace Ui {
     class MainWindow;
 }
@@ -59,6 +59,11 @@ private slots:
     void sendMessage();
 
     void receiveMessage(NetworkData data);
+public slots:
+
+  //  void showStartMenu();
+
+  //  void startGame();
 
     // void updateTimeSlot(QString time);
 
@@ -89,6 +94,8 @@ private:
     QLabel *titleReset = nullptr;
     QLabel *labelTotal = nullptr;
     QLabel *labelReset = nullptr;
+
+    StartMenu *startMenu;
 };
 
 #endif // MAINWINDOW_H

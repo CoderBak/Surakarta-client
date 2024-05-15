@@ -6,7 +6,7 @@
 #include <QMutex>
 
 using posType = std::pair<int, int>;
-constexpr unsigned int BOARD_SIZE = 10;
+constexpr unsigned int BOARD_SIZE = 6;
 constexpr unsigned int maxNoCapture = 40;
 constexpr int WIDTH = 1180;
 constexpr int HEIGHT = 820;
@@ -23,7 +23,7 @@ constexpr auto BLACK_COLOR = Qt::black;
 constexpr auto WHITE_COLOR = Qt::white;
 constexpr auto CHESS_BORDER = Qt::black;
 constexpr auto SELECTED_COLOR = Qt::red;
-constexpr Qt::GlobalColor EATABLE_COLOR = Qt::darkBlue;
+constexpr Qt::GlobalColor EATABLE_COLOR = Qt::green;
 constexpr auto MOVABLE_COLOR = Qt::green;
 constexpr auto ANIMATION_PER_TIME = 500;
 constexpr auto ANIMATION_STEP = 100;

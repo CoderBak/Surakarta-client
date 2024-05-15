@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/image">
+        <file>image/22.jpg</file>
+        <file>image/start_button.jpg</file>
+        <file>image/background-removed.png</file>
+    </qresource>
+</RCC>

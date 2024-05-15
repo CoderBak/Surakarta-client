@@ -10,7 +10,7 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QThread>
-
+#include "startmenu.h"
 QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
     this->installEventFilter(this);
     setMouseTracking(true);
@@ -62,7 +62,8 @@ MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
         socket(new QTcpSocket(this)),
-        board(new QtBoard(this)) {
+        board(new QtBoard(this))
+{
 
     ui->setupUi(this);
 
@@ -178,7 +179,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(socket1, &NetworkSocket::receive, this, &MainWindow::receiveMessage);*/
 
     // Connect the button to functions.
-
+    // connect(startMenu, &StartMenu::startGame,this,&MainWindow::startGame);
     connect(board, &QtBoard::sendMovableQuery, this, &MainWindow::handleMovableQuery);
     connect(board, &QtBoard::sendEatableQuery, this, &MainWindow::handleEatableQuery);
     connect(board, &QtBoard::sendMoveInfo, this, &MainWindow::handleMoveInfo);
@@ -207,7 +208,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow() {
     delete ui;
+    delete startMenu;
 }
+
+
 
 void MainWindow::sendTryAgain() {
     socket->write("$G;");
@@ -454,7 +458,7 @@ auto calculateRotation = [](auto step, auto row, auto col) {
     if (row == 0 && col >= n / 2 || col == n - 1 && row < n / 2) {
         centerX = DELTA_X + BOARD_HEIGHT;
         centerY = DELTA_Y;
-        layer = x + 1;
+        layer = n - x;
         // 逆时针
         if (row != 0) {
             angle = 270 + angle;
@@ -482,6 +486,8 @@ void QtBoard::animationStep() {
             repaint();
             extraX = -1;
             extraY = -1;
+            currentStep += 10;
+
         } else {
             const auto [centerX, centerY] = calculateRotation(currentStep, lastRow, lastCol);
             extraX = centerX;
@@ -489,8 +495,8 @@ void QtBoard::animationStep() {
             repaint();
             extraX = -1;
             extraY = -1;
+            currentStep += 1;
         }
-        currentStep += 1;
         if (currentStep > ANIMATION_STEP) {
             chessColor[row][col] = current_player;
             lastRow = row;

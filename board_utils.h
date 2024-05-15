@@ -25,7 +25,8 @@ constexpr auto CHESS_BORDER = Qt::black;
 constexpr auto SELECTED_COLOR = Qt::red;
 constexpr auto EATABLE_COLOR = Qt::blue;
 constexpr auto MOVABLE_COLOR = Qt::green;
-constexpr auto EATABLE_PATH_COLOR = Qt::yellow;
+constexpr auto ANIMATION_PER_TIME = 500;
+// constexpr auto EATABLE_PATH_COLOR = Qt::yellow;
 constexpr int selectedSize = 5;
 constexpr int maxSecond = 1000;
 const QHostAddress serverIP = QHostAddress("20.212.82.172");
@@ -63,6 +64,8 @@ public:
 
     void animationStep();
 
+    void highlightPath(QPainter& painter);
+
 signals:
 
     void sendMoveInfo(const QByteArray &moveInfo);
@@ -91,8 +94,10 @@ private:
     QMutex animationMutex;
     int currentPathIndex;
     int lastRow, lastCol;
+    int fromRow, fromCol;
     const std::vector<posType>* currentPath;
     bool inAnimation = false;
+    bool shouldCheckAnimation = false;
 };
 
 #endif // QTBOARD_H

@@ -213,7 +213,6 @@ void MainWindow::sendTryAgain() {
     socket->write("$G;");
 }
 
-
 // Process data in this function.
 void MainWindow::getData() {
     QByteArray data = socket->readAll();
@@ -342,7 +341,7 @@ void MainWindow::dataHandler(const QByteArray &info) {
 
 // Process boardInfo in this function.
 void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
-    qDebug () << "PROCESSING BOARD";
+    qDebug() << "PROCESSING BOARD";
     QString boardInfoStr = QString::fromUtf8(boardInfo);
     QStringList rows = boardInfoStr.split('\n');
     for (int row = 0; row < BOARD_SIZE; row += 1) {
@@ -369,7 +368,12 @@ void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
         }
     }
     // Animation & repaint
-    animateMove();
+    if (shouldCheckAnimation) {
+        animateMove();
+        shouldCheckAnimation = false;
+    } else {
+        repaint();
+    }
 }
 
 void QtBoard::animateMove() {
@@ -392,9 +396,10 @@ void QtBoard::animateMove() {
         }
     }
     if (isEatableFound) {
+        inAnimation = true;
         animationTimer = new QTimer(this);
         connect(animationTimer, &QTimer::timeout, this, &QtBoard::animationStep);
-        animationTimer->setInterval(1000);
+        animationTimer->setInterval(ANIMATION_PER_TIME);
         animationTimer->start();
     } else {
         repaint();
@@ -418,6 +423,7 @@ void QtBoard::animationStep() {
         currentPathIndex = 0;
         currentPath = nullptr;
         eatable.clear();
+        inAnimation = false;
         repaint();
     }
 }
@@ -442,6 +448,11 @@ auto drawArcs = [](QPainter &painter, auto centerX, auto centerY, auto startAngl
 void QtBoard::paintEvent(QPaintEvent *) {
     QPainter painter(this);
     painter.fillRect(rect(), BACK_COLOR);
+
+    if (inAnimation) {
+        highlightPath(painter);
+    }
+
     // Draw k = size / 2 layers of arc, centered at centerX, centerY.
     painter.setPen(QPen(DEFAULT_COLOR, PEN_WIDTH));
     for (int i = 0; i < BOARD_SIZE; i += 1) {
@@ -476,7 +487,67 @@ void QtBoard::paintEvent(QPaintEvent *) {
             emphasize(elem.second, elem.first, MOVABLE_COLOR);
         }
     }
+
     drawChess();
+}
+
+void QtBoard::highlightPath(QPainter &painter) {
+    auto fillPath = [&](auto centerX, auto centerY, auto startAngle, auto layer) {
+        int radius = layer * cellSize;
+        constexpr int endAngle = 270 * 16;
+        painter.setPen(QPen(DEFAULT_COLOR, PEN_WIDTH, Qt::DashLine));
+        painter.setBrush(PATH_COLOR);
+        QRectF rect(centerX - radius, centerY - radius, 2 * radius, 2 * radius);
+        painter.drawPie(rect, startAngle, endAngle);
+        radius -= cellSize;
+        painter.setBrush(BACK_COLOR);
+        rect = QRectF(centerX - radius, centerY - radius, 2 * radius, 2 * radius);
+        painter.drawPie(rect, startAngle, endAngle);
+        drawArcs(painter, centerX, centerY, startAngle, layer - 1);
+        painter.setPen(QPen(DEFAULT_COLOR, PEN_WIDTH));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRect(DELTA_X, DELTA_Y, BOARD_HEIGHT, BOARD_HEIGHT);
+    };
+
+    auto isNeighbour = [](const int x1, const int y1, const int x2, const int y2) {
+        return (x1 - x2) * (y1 - y2) == 0;
+    };
+
+    auto emphasize = [&](const int col, const int row, auto color) {
+        const auto [centerX, centerY] = translateIdx(col, row);
+        const QRect rect(centerX - cellSize / 2, centerY - cellSize / 2, cellSize, cellSize);
+        painter.fillRect(rect, PATH_COLOR);
+    };
+
+    auto transfer = [&](const int col, const int row, const int futureCol, const int futureRow) {
+        if (!isNeighbour(row, col, futureRow, futureCol)) {
+            const int x = std::abs(row - col), n = BOARD_SIZE;
+            if (row == n - 1 && col < n / 2 || col == 0 && row >= n / 2) {
+                fillPath(DELTA_X, DELTA_Y + BOARD_HEIGHT, 90 * 16, n - x);
+            }
+            if (row == n - 1 && col >= n / 2 || col == n - 1 && row >= n / 2) {
+                fillPath(DELTA_X + BOARD_HEIGHT, DELTA_Y + BOARD_HEIGHT, 180 * 16, x + 1);
+            }
+            if (row == 0 && col < n / 2 || col == 0 && row < n / 2) {
+                fillPath(DELTA_X, DELTA_Y, 0, x + 1);
+            }
+            if (row == 0 && col >= n / 2 || col == n - 1 && row < n / 2) {
+                fillPath(DELTA_X + BOARD_HEIGHT, DELTA_Y, 270 * 16, n - x);
+            }
+        }
+    };
+
+    const auto size = currentPath->size();
+    emphasize(fromCol, fromRow, PATH_COLOR);
+    emphasize((*currentPath)[size - 1].second, (*currentPath)[size - 1].first, PATH_COLOR);
+    transfer(fromCol, fromRow, (*currentPath)[0].second, (*currentPath)[0].first);
+
+    for (int i = 0; i < size - 1; i += 1) {
+        const auto [row, col] = (*currentPath)[i];
+        const auto [futureRow, futureCol] = (*currentPath)[i + 1];
+        transfer(col, row, futureCol, futureRow);
+        emphasize(col, row, PATH_COLOR);
+    }
 }
 
 // Draw all the chess.
@@ -516,7 +587,10 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
                 if (selectedPieceRow != -1 && selectedPieceCol != -1) {
                     QString moveInfo = QString("$M%1;%2;%3;%4")
                             .arg(selectedPieceCol).arg(selectedPieceRow).arg(col).arg(row);
+                    fromRow = selectedPieceRow;
+                    fromCol = selectedPieceCol;
                     selectedPieceRow = selectedPieceCol = -1;
+                    shouldCheckAnimation = true;
                     emit sendMoveInfo(moveInfo.toUtf8());
                     repaint();
                     //movable.clear();

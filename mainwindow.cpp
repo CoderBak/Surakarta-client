@@ -467,24 +467,24 @@ void QtBoard::paintEvent(QPaintEvent *) {
     drawArcs(painter, DELTA_X, DELTA_Y + BOARD_HEIGHT, 90 * 16, BOARD_SIZE / 2);
     drawArcs(painter, DELTA_X + BOARD_HEIGHT, DELTA_Y + BOARD_HEIGHT, 180 * 16, BOARD_SIZE / 2);
 
-    auto emphasize = [&](const int col, const int row, auto color) {
+    auto emphasize = [&](const int col, const int row, auto color, auto line, auto size) {
         const auto [centerX, centerY] = translateIdx(col, row);
         const QRect rect(centerX - chessRadius, centerY - chessRadius, 2 * chessRadius, 2 * chessRadius);
-        painter.setPen(QPen(color, selectedSize));
+        painter.setPen(QPen(color, size, line));
         painter.setBrush(Qt::NoBrush);
         painter.drawEllipse(rect);
     };
 
     // Show the chess at clicked.
     if (selectedPieceRow != -1 && selectedPieceCol != -1) {
-        emphasize(selectedPieceCol, selectedPieceRow, SELECTED_COLOR);
+        emphasize(selectedPieceCol, selectedPieceRow, SELECTED_COLOR, selectedLine, selectedSize);
         // Show the eatable
         for (const auto &elem: eatable) {
-            emphasize(elem.first.second, elem.first.first, EATABLE_COLOR);
+            emphasize(elem.first.second, elem.first.first, EATABLE_COLOR, selectedLine, selectedSize);
         }
         // Show the movable
         for (const auto &elem: movable) {
-            emphasize(elem.second, elem.first, MOVABLE_COLOR);
+            emphasize(elem.second, elem.first, MOVABLE_COLOR, emphasizeLine, emphasizeSize);
         }
     }
 
@@ -593,7 +593,6 @@ void QtBoard::mousePressEvent(QMouseEvent *event) {
                     shouldCheckAnimation = true;
                     emit sendMoveInfo(moveInfo.toUtf8());
                     repaint();
-                    //movable.clear();
                 }
             }
         }
@@ -658,11 +657,27 @@ void QtBoard::mouseMoveEvent(QMouseEvent *event) {
     const int dx = x - DELTA_X, dy = y - DELTA_Y;
     if (0 <= dx && dx <= BOARD_HEIGHT && 0 <= dy && dy <= BOARD_HEIGHT) {
         const int row = dy / cellSize, col = dx / cellSize;
+        const auto [centerX, centerY] = translateIdx(col, row);
         if (chessColor[row][col] == current_player) {
-            const auto [centerX, centerY] = translateIdx(col, row);
             if (std::pow(centerX - x, 2) + std::pow(centerY - y, 2) <= std::pow(chessRadius, 2)) {
                 QApplication::setOverrideCursor(Qt::PointingHandCursor);
                 return;
+            }
+        }
+        for (const auto &elem: eatable) {
+            if (elem.first.first == row && elem.first.second == col) {
+                if (std::pow(centerX - x, 2) + std::pow(centerY - y, 2) <= std::pow(chessRadius, 2)) {
+                    QApplication::setOverrideCursor(Qt::PointingHandCursor);
+                    return;
+                }
+            }
+        }
+        for (const auto &elem: movable) {
+            if (elem.first == row && elem.second == col) {
+                if (std::pow(centerX - x, 2) + std::pow(centerY - y, 2) <= std::pow(chessRadius, 2)) {
+                    QApplication::setOverrideCursor(Qt::PointingHandCursor);
+                    return;
+                }
             }
         }
     }

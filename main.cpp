@@ -25,13 +25,13 @@ int main(int argc, char *argv[]) {
         setting.show();
     });
 
-       QObject::connect(&menu, &StartMenu::reshow, [&]() {
-           // TODO:
-           qDebug() << "Replay button clicked";
-       });
-      // QObject::connect(&setting, &Settings::settingsApplied, board, &QtBoard::receiveDataFromUser);
-       QObject::connect(&setting, &Settings::settingsApplied, &w, &MainWindow::receiveBoardSizeFromSettings);
-       QObject::connect(&setting, &Settings::colorSelected, &w, &MainWindow::receivePieceColorFromSettings);
+    QObject::connect(&menu, &StartMenu::reshow, [&]() {
+        // TODO:
+        qDebug() << "Replay button clicked";
+    });
+    // QObject::connect(&setting, &Settings::settingsApplied, board, &QtBoard::receiveDataFromUser);
+    QObject::connect(&setting, &Settings::settingsApplied, &w, &MainWindow::receiveBoardSizeFromSettings);
+    QObject::connect(&setting, &Settings::colorSelected, &w, &MainWindow::receivePieceColorFromSettings);
     menu.show();
     // w.show();
     return QApplication::exec();

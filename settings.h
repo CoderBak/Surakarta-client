@@ -9,27 +9,31 @@
 #include <QButtonGroup>
 
 class Settings : public QWidget {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit Settings(QWidget *parent = nullptr);
 
-signals:
+    signals:
 
-    void settingsApplied(int value);
+            void settingsApplied(int
+    value);
+
     void colorSelected(char color);
 
-private slots:
+private
+    slots:
 
-    void applyButtonClicked(int value);
+            void applyButtonClicked(int
+    value);
+
     void handleColorRadioButtonClicked(int val);
+
 private:
     QSlider *slider;
     QPushButton *applyButton;
     QButtonGroup *sizeButtonGroup;
     QButtonGroup *colorButtonGroup;
-
-
 
 
 };

@@ -48,11 +48,12 @@ bool QtBoard::eventFilter(QObject *obj, QEvent *event) {
 void QtBoard::setCurrentPlayer(ChessColor cur) {
     current_player = cur;
 }
-void QtBoard::receiveDataFromUser(int value,char piece_color){
-    if(value!=0)
-    qDebug()<<"BOARD_SIZE = "<< value;
-    if(piece_color!=0)
-    qDebug()<<"piece_color = "<< piece_color;
+
+void QtBoard::receiveDataFromUser(int value, char piece_color) {
+    if (value != 0)
+        qDebug() << "BOARD_SIZE = " << value;
+    if (piece_color != 0)
+        qDebug() << "piece_color = " << piece_color;
 
 }
 
@@ -76,19 +77,20 @@ void MainWindow::handleCheckBoxStateChanged(int state) {
     emit aiControlChanged(enable);
 }
 
-void MainWindow::receiveBoardSizeFromSettings(int size){
-    board->receiveDataFromUser(size,0);
+void MainWindow::receiveBoardSizeFromSettings(int size) {
+    board->receiveDataFromUser(size, 0);
 }
-void MainWindow::receivePieceColorFromSettings(char color){
-    board->receiveDataFromUser(0,color);
+
+void MainWindow::receivePieceColorFromSettings(char color) {
+    board->receiveDataFromUser(0, color);
 }
+
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
         socket(new QTcpSocket(this)),
         board(new QtBoard(this)),
-        setting(new Settings(this))
-{
+        setting(new Settings(this)) {
 
     ui->setupUi(this);
 

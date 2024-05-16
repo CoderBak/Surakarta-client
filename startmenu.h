@@ -10,7 +10,7 @@ namespace Ui {
     class StartMenu;
 }
 class StartMenu : public QWidget {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit StartMenu(QWidget *parent = nullptr);
@@ -19,9 +19,9 @@ public:
 
     ~StartMenu();
 
-signals:
+    signals:
 
-    void startGame();
+            void startGame();
 
     void humanVsAI();
 
@@ -30,9 +30,10 @@ signals:
     void reshow();
 
 
-private slots:
+private
+    slots:
 
-    void handleStartButtonClicked();
+            void handleStartButtonClicked();
 
     void handleSettings();
 

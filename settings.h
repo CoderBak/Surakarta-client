@@ -7,17 +7,20 @@
 #include<QVBoxLayout>
 #include <QRadioButton>
 #include <QButtonGroup>
-class Settings : public QWidget
-{
-    Q_OBJECT
+
+class Settings : public QWidget {
+Q_OBJECT
+
 public:
     explicit Settings(QWidget *parent = nullptr);
 
 signals:
+
     void settingsApplied(int value);
     void colorSelected(char color);
 
 private slots:
+
     void applyButtonClicked(int value);
     void handleColorRadioButtonClicked(int val);
 private:

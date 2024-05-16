@@ -2,8 +2,7 @@
 #include "settings.h"
 
 Settings::Settings(QWidget *parent) :
-    QWidget(parent)
-{
+        QWidget(parent) {
     // 创建滑动条
     slider = new QSlider(Qt::Horizontal, this);
     slider->setRange(0, 100);
@@ -22,8 +21,8 @@ Settings::Settings(QWidget *parent) :
         colorButtonGroup->addButton(colorYellowButton);
         colorButtonGroup->addButton(colorBlueButton);
 
-        // Connect size button group signal to slot
-       // connect(sizeButtonGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(applyButtonClicked()));
+    // Connect size button group signal to slot
+    // connect(sizeButtonGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(applyButtonClicked()));
 
 
 
@@ -53,6 +52,7 @@ void Settings::handleColorRadioButtonClicked(int val) {
      qDebug()<<"emit value of color && color ="<< colorInitial;
     emit colorSelected(colorInitial);
 }
+
 void Settings::applyButtonClicked(int value)
 {
      // 获取当前选中的按钮

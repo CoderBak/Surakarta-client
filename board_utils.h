@@ -1,5 +1,6 @@
 #ifndef QTBOARD_H
 #define QTBOARD_H
+
 #include "settings.h"
 #include <QWidget>
 #include <QHostAddress>
@@ -80,6 +81,7 @@ signals:
 
 public slots:
     void receiveDataFromUser(int value,char piece_color);
+
 
     void setHandledByAI(bool enabled);
 

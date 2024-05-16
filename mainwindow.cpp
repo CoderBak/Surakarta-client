@@ -20,11 +20,12 @@ QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
             chessColor[i][j] = NONE;
         }
     }
-   // connect(&settings, &Settings::settingsApplied, this, &QtBoard::receiveDataFromUser);
+    // connect(&settings, &Settings::settingsApplied, this, &QtBoard::receiveDataFromUser);
 }
-void QtBoard::setHandledByAI(bool enabled){
-    handledByAI=enabled;
-    qDebug()<<" handledByAI = "<< handledByAI;
+
+void QtBoard::setHandledByAI(bool enabled) {
+    handledByAI = enabled;
+    qDebug() << " handledByAI = " << handledByAI;
 }
 
 QtBoard::~QtBoard() {
@@ -52,7 +53,9 @@ void QtBoard::receiveDataFromUser(int value,char piece_color){
     qDebug()<<"BOARD_SIZE = "<< value;
     if(piece_color!=0)
     qDebug()<<"piece_color = "<< piece_color;
+
 }
+
 // Send the pressed information.
 void MainWindow::handleMoveInfo(const QByteArray &moveInfo) {
     socket->write(moveInfo);
@@ -68,10 +71,11 @@ void MainWindow::handleMovableQuery(const posType &pos) {
     socket->write(query);
 }
 
-void MainWindow::handleCheckBoxStateChanged(int state){
-   bool enable =(state == Qt::Checked);
-   emit aiControlChanged(enable);
+void MainWindow::handleCheckBoxStateChanged(int state) {
+    bool enable = (state == Qt::Checked);
+    emit aiControlChanged(enable);
 }
+
 void MainWindow::receiveBoardSizeFromSettings(int size){
     board->receiveDataFromUser(size,0);
 }
@@ -104,10 +108,10 @@ MainWindow::MainWindow(QWidget *parent) :
     auto *menu = new QVBoxLayout;
 
     // Add buttons to the menu.
-     menu->addWidget(ui->tryAgainButton);
-     menu->addWidget(ui->giveUpButton);
-     menu->addWidget(ui->openChatroomButton);
-     menu->addWidget(ui->Altrusteeship);
+    menu->addWidget(ui->tryAgainButton);
+    menu->addWidget(ui->giveUpButton);
+    menu->addWidget(ui->openChatroomButton);
+    menu->addWidget(ui->Altrusteeship);
     // // Set the layout.
     layout->addLayout(menu);
     layout->addWidget(board);

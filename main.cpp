@@ -8,22 +8,22 @@ int main(int argc, char *argv[]) {
     Settings setting;
     //QObject::connect(&menu,&StartMenu::startGame,&w,&MainWindow::startGame);
     QObject::connect(&menu, &StartMenu::startGame, [&]() {
-           menu.hide();
-           w.show();
-          // w.startGame();
-       });
+        menu.hide();
+        w.show();
+        // w.startGame();
+    });
     QObject::connect(&menu, &StartMenu::humanVsAI, [&]() {
-           menu.hide();
-           // TODO:
-           qDebug() << "Human vs AI button clicked";
-           w.show();
-       });
+        menu.hide();
+        // TODO:
+        qDebug() << "Human vs AI button clicked";
+        w.show();
+    });
 
-       QObject::connect(&menu, &StartMenu::settings, [&]() {
-           // TODO:
-           qDebug() << "Settings button clicked";
-           setting.show();
-       });
+    QObject::connect(&menu, &StartMenu::settings, [&]() {
+        // TODO:
+        qDebug() << "Settings button clicked";
+        setting.show();
+    });
 
        QObject::connect(&menu, &StartMenu::reshow, [&]() {
            // TODO:
@@ -33,6 +33,6 @@ int main(int argc, char *argv[]) {
        QObject::connect(&setting, &Settings::settingsApplied, &w, &MainWindow::receiveBoardSizeFromSettings);
        QObject::connect(&setting, &Settings::colorSelected, &w, &MainWindow::receivePieceColorFromSettings);
     menu.show();
-   // w.show();
+    // w.show();
     return QApplication::exec();
 }

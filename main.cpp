@@ -5,6 +5,7 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     MainWindow w;
     StartMenu menu;
+    Settings setting;
     //QObject::connect(&menu,&StartMenu::startGame,&w,&MainWindow::startGame);
     QObject::connect(&menu, &StartMenu::startGame, [&]() {
            menu.hide();
@@ -21,9 +22,10 @@ int main(int argc, char *argv[]) {
        QObject::connect(&menu, &StartMenu::settings, [&]() {
            // TODO:
            qDebug() << "Settings button clicked";
+           setting.show();
        });
 
-       QObject::connect(&menu, &StartMenu::replay, [&]() {
+       QObject::connect(&menu, &StartMenu::reshow, [&]() {
            // TODO:
            qDebug() << "Replay button clicked";
        });

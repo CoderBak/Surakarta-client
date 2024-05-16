@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1180</width>
-    <height>820</height>
+    <width>580</width>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,6 +29,19 @@
      </widget>
     </item>
     <item>
+     <widget class="QPushButton" name="openChatroomButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Chatroom</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QPushButton" name="giveUpButton">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -42,7 +55,10 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="openChatroomButton">
+     <widget class="QCheckBox" name="Altrusteeship">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="sizePolicy">
        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -50,7 +66,7 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>Chatroom</string>
+       <string>Ai托管</string>
       </property>
      </widget>
     </item>

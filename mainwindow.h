@@ -11,6 +11,7 @@
 #include "NetworkLibrary/networksocket.h"
 #include "NetworkLibrary/networkdata.h"
 #include "startmenu.h"
+#include "settings.h"
 
 namespace Ui {
     class MainWindow;
@@ -63,6 +64,8 @@ private slots:
 
 public slots:
 
+
+    void handleCheckBoxStateChanged(int state);
     //  void showStartMenu();
 
     //  void startGame();
@@ -77,6 +80,8 @@ public slots:
 
 signals:
 
+    void aiControlChanged(bool enabled);
+
     void sendEatable(const QByteArray &info);
 
     void sendMovable(const QByteArray &info);
@@ -88,7 +93,7 @@ private:
     QString ip = "127.0.0.1";
     Ui::MainWindow *ui;
     NetworkSocket *socket1;
-
+    Settings *settings;
     QTcpSocket *socket;
     QtBoard *board;
     QByteArray msg;

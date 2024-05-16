@@ -68,7 +68,7 @@ public:
 
     void animationStep();
 
-    void highlightPath(QPainter& painter);
+    void highlightPath(QPainter &painter);
 
 signals:
 
@@ -98,7 +98,7 @@ private:
     int currentPathIndex;
     int lastRow, lastCol;
     int fromRow, fromCol;
-    const std::vector<posType>* currentPath;
+    const std::vector<posType> *currentPath;
     bool inAnimation = false;
     bool shouldCheckAnimation = false;
     int extraX = -1, extraY = -1;

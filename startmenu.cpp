@@ -1,9 +1,10 @@
 #include "startmenu.h"
 #include <QVBoxLayout>
 #include <QIcon>
+
 StartMenu::StartMenu(QWidget *parent) : QWidget(parent) {
     // Create the layout for the start menu
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    QVBoxLayout * layout = new QVBoxLayout(this);
 
     // Load the image
     QPixmap image(":/image/image/22.jpg");
@@ -36,10 +37,8 @@ StartMenu::StartMenu(QWidget *parent) : QWidget(parent) {
 }
 
 StartMenu::~StartMenu() {
-    // Clean up dynamically allocated resources, if any
 }
 
 void StartMenu::handleStartButtonClicked() {
-    // Emit the startGame signal when the start button is clicked
     emit startGame();
 }

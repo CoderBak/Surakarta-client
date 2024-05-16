@@ -11,6 +11,7 @@
 #include <QStatusBar>
 #include <QThread>
 #include "startmenu.h"
+
 QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
     this->installEventFilter(this);
     setMouseTracking(true);
@@ -19,7 +20,6 @@ QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
             chessColor[i][j] = NONE;
         }
     }
-
 }
 
 QtBoard::~QtBoard() {
@@ -62,8 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
         socket(new QTcpSocket(this)),
-        board(new QtBoard(this))
-{
+        board(new QtBoard(this)) {
 
     ui->setupUi(this);
 
@@ -208,10 +207,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow() {
     delete ui;
-    delete startMenu;
 }
-
-
 
 void MainWindow::sendTryAgain() {
     socket->write("$G;");

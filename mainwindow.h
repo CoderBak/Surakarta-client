@@ -11,6 +11,7 @@
 #include "NetworkLibrary/networksocket.h"
 #include "NetworkLibrary/networkdata.h"
 #include "startmenu.h"
+
 namespace Ui {
     class MainWindow;
 }
@@ -59,11 +60,12 @@ private slots:
     void sendMessage();
 
     void receiveMessage(NetworkData data);
+
 public slots:
 
-  //  void showStartMenu();
+    //  void showStartMenu();
 
-  //  void startGame();
+    //  void startGame();
 
     // void updateTimeSlot(QString time);
 

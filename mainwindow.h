@@ -66,6 +66,10 @@ public slots:
 
 
     void handleCheckBoxStateChanged(int state);
+
+    void receiveBoardSizeFromSettings(int size);
+
+    void receivePieceColorFromSettings(char color);
     //  void showStartMenu();
 
     //  void startGame();
@@ -93,7 +97,7 @@ private:
     QString ip = "127.0.0.1";
     Ui::MainWindow *ui;
     NetworkSocket *socket1;
-    Settings *settings;
+    Settings *setting;
     QTcpSocket *socket;
     QtBoard *board;
     QByteArray msg;

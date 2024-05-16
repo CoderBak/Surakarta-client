@@ -48,9 +48,12 @@ bool QtBoard::eventFilter(QObject *obj, QEvent *event) {
 void QtBoard::setCurrentPlayer(ChessColor cur) {
     current_player = cur;
 }
+void QtBoard::receiveDataFromUser(int value,char piece_color){
+    if(value!=0)
+    qDebug()<<"BOARD_SIZE = "<< value;
+    if(piece_color!=0)
+    qDebug()<<"piece_color = "<< piece_color;
 
-void QtBoard::receiveDataFromUser(int value) {
-    qDebug() << "BOARD_SIZE = " << value;
 }
 
 // Send the pressed information.
@@ -73,12 +76,19 @@ void MainWindow::handleCheckBoxStateChanged(int state) {
     emit aiControlChanged(enable);
 }
 
+void MainWindow::receiveBoardSizeFromSettings(int size){
+    board->receiveDataFromUser(size,0);
+}
+void MainWindow::receivePieceColorFromSettings(char color){
+    board->receiveDataFromUser(0,color);
+}
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
         socket(new QTcpSocket(this)),
         board(new QtBoard(this)),
-        settings(new Settings(this)) {
+        setting(new Settings(this))
+{
 
     ui->setupUi(this);
 
@@ -195,8 +205,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Connect the button to functions.
     // connect(startMenu, &StartMenu::startGame,this,&MainWindow::startGame);
-
-    connect(settings, &Settings::settingsApplied, board, &QtBoard::receiveDataFromUser);
+    //qDebug()<<" run before connect";
+    //connect(setting, &Settings::settingsApplied, board, &QtBoard::receiveDataFromUser);
 
     connect(ui->Altrusteeship, &QCheckBox::stateChanged, this, &MainWindow::handleCheckBoxStateChanged);
     connect(this, &MainWindow::aiControlChanged, board, &QtBoard::setHandledByAI);

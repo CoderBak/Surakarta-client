@@ -1,5 +1,6 @@
 #ifndef QTBOARD_H
 #define QTBOARD_H
+
 #include "settings.h"
 #include <QWidget>
 #include <QHostAddress>
@@ -79,6 +80,7 @@ signals:
     void sendMovableQuery(const posType &pos);
 
 public slots:
+
     void receiveDataFromUser(int value);
 
     void setHandledByAI(bool enabled);

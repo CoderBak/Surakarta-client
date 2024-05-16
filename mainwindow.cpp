@@ -20,6 +20,11 @@ QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
             chessColor[i][j] = NONE;
         }
     }
+   // connect(&settings, &Settings::settingsApplied, this, &QtBoard::receiveDataFromUser);
+}
+void QtBoard::setHandledByAI(bool enabled){
+    handledByAI=enabled;
+    qDebug()<<" handledByAI = "<< handledByAI;
 }
 
 QtBoard::~QtBoard() {
@@ -42,7 +47,9 @@ bool QtBoard::eventFilter(QObject *obj, QEvent *event) {
 void QtBoard::setCurrentPlayer(ChessColor cur) {
     current_player = cur;
 }
-
+void QtBoard::receiveDataFromUser(int value){
+    qDebug()<<"BOARD_SIZE = "<< value;
+}
 // Send the pressed information.
 void MainWindow::handleMoveInfo(const QByteArray &moveInfo) {
     socket->write(moveInfo);
@@ -58,11 +65,17 @@ void MainWindow::handleMovableQuery(const posType &pos) {
     socket->write(query);
 }
 
+void MainWindow::handleCheckBoxStateChanged(int state){
+   bool enable =(state == Qt::Checked);
+   emit aiControlChanged(enable);
+}
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
         socket(new QTcpSocket(this)),
-        board(new QtBoard(this)) {
+        board(new QtBoard(this)),
+        settings(new Settings(this))
+{
 
     ui->setupUi(this);
 
@@ -82,11 +95,11 @@ MainWindow::MainWindow(QWidget *parent) :
     auto *menu = new QVBoxLayout;
 
     // Add buttons to the menu.
-    menu->addWidget(ui->tryAgainButton);
-    menu->addWidget(ui->giveUpButton);
-    menu->addWidget(ui->openChatroomButton);
-
-    // Set the layout.
+     menu->addWidget(ui->tryAgainButton);
+     menu->addWidget(ui->giveUpButton);
+     menu->addWidget(ui->openChatroomButton);
+     menu->addWidget(ui->Altrusteeship);
+    // // Set the layout.
     layout->addLayout(menu);
     layout->addWidget(board);
 
@@ -179,6 +192,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Connect the button to functions.
     // connect(startMenu, &StartMenu::startGame,this,&MainWindow::startGame);
+
+    connect(settings, &Settings::settingsApplied, board, &QtBoard::receiveDataFromUser);
+
+    connect(ui->Altrusteeship, &QCheckBox::stateChanged, this, &MainWindow::handleCheckBoxStateChanged);
+    connect(this, &MainWindow::aiControlChanged, board, &QtBoard::setHandledByAI);
     connect(board, &QtBoard::sendMovableQuery, this, &MainWindow::handleMovableQuery);
     connect(board, &QtBoard::sendEatableQuery, this, &MainWindow::handleEatableQuery);
     connect(board, &QtBoard::sendMoveInfo, this, &MainWindow::handleMoveInfo);

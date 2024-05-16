@@ -1,6 +1,6 @@
 #ifndef QTBOARD_H
 #define QTBOARD_H
-
+#include "settings.h"
 #include <QWidget>
 #include <QHostAddress>
 #include <QMutex>
@@ -79,6 +79,9 @@ signals:
     void sendMovableQuery(const posType &pos);
 
 public slots:
+    void receiveDataFromUser(int value);
+
+    void setHandledByAI(bool enabled);
 
     void animateMove();
 
@@ -87,6 +90,7 @@ public slots:
     void handleMovable(const QByteArray &);
 
 private:
+    //Settings settings;
     ChessColor chessColor[BOARD_SIZE][BOARD_SIZE];
     ChessColor current_player;
     int selectedPieceRow = -1;
@@ -99,6 +103,7 @@ private:
     int lastRow, lastCol;
     int fromRow, fromCol;
     const std::vector<posType> *currentPath;
+    bool handledByAI = false;
     bool inAnimation = false;
     bool shouldCheckAnimation = false;
     int extraX = -1, extraY = -1;

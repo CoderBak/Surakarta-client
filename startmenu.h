@@ -15,6 +15,8 @@ Q_OBJECT
 public:
     explicit StartMenu(QWidget *parent = nullptr);
 
+    void paintEvent(QPaintEvent *) override;
+
     ~StartMenu();
 
 signals:
@@ -25,12 +27,14 @@ signals:
 
     void settings();
 
-    void replay();
+    void reshow();
 
 
 private slots:
 
     void handleStartButtonClicked();
+
+    void handleSettings();
 
 private:
     QPushButton *startButton;

@@ -79,7 +79,7 @@ signals:
     void sendMovableQuery(const posType &pos);
 
 public slots:
-    void receiveDataFromUser(int value);
+    void receiveDataFromUser(int value,char piece_color);
 
     void setHandledByAI(bool enabled);
 

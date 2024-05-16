@@ -29,6 +29,9 @@ int main(int argc, char *argv[]) {
            // TODO:
            qDebug() << "Replay button clicked";
        });
+      // QObject::connect(&setting, &Settings::settingsApplied, board, &QtBoard::receiveDataFromUser);
+       QObject::connect(&setting, &Settings::settingsApplied, &w, &MainWindow::receiveBoardSizeFromSettings);
+       QObject::connect(&setting, &Settings::colorSelected, &w, &MainWindow::receivePieceColorFromSettings);
     menu.show();
    // w.show();
     return QApplication::exec();

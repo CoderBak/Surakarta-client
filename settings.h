@@ -15,14 +15,19 @@ public:
 
 signals:
     void settingsApplied(int value);
+    void colorSelected(char color);
 
 private slots:
     void applyButtonClicked(int value);
-
+    void handleColorRadioButtonClicked(int val);
 private:
     QSlider *slider;
     QPushButton *applyButton;
     QButtonGroup *sizeButtonGroup;
+    QButtonGroup *colorButtonGroup;
+
+
+
 
 };
 

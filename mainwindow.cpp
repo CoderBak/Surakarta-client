@@ -382,7 +382,7 @@ void MainWindow::dataHandler(const QByteArray &info) {
 
 // Process boardInfo in this function.
 void QtBoard::processBoardInfo(const QByteArray &boardInfo) {
-    qDebug() << "PROCESSING BOARD";
+    gameCount += 1;
     QString boardInfoStr = QString::fromUtf8(boardInfo);
     QStringList rows = boardInfoStr.split('\n');
     for (int row = 0; row < BOARD_SIZE; row += 1) {
@@ -698,10 +698,41 @@ void QtBoard::drawChess() {
 // Handle mouse press event.
 void QtBoard::mousePressEvent(QMouseEvent *event) {
     QPoint mousePos = event->pos();
+    if ((gameCount % 2 == 0) ^ (current_player != BLACK)) {
+        return;
+    }
     if (event->button() == Qt::LeftButton) {
-        const int row = (mousePos.y() - DELTA_Y) / cellSize;
-        const int col = (mousePos.x() - DELTA_X) / cellSize;
-        if (0 <= row && row < BOARD_SIZE && 0 <= col && col < BOARD_SIZE) {
+        bool canClick = false;
+        const int x = mousePos.x(), y = mousePos.y();
+        const int dx = x - DELTA_X, dy = y - DELTA_Y;
+        if (0 <= dx && dx <= BOARD_HEIGHT && 0 <= dy && dy <= BOARD_HEIGHT) {
+            const int row = dy / cellSize, col = dx / cellSize;
+            const auto [centerX, centerY] = translateIdx(col, row);
+            if (chessColor[row][col] == current_player) {
+                if (std::pow(centerX - x, 2) + std::pow(centerY - y, 2) <= std::pow(chessRadius, 2)) {
+                    canClick = true;
+                }
+            }
+            for (const auto &elem: eatable) {
+                if (elem.first.first == row && elem.first.second == col) {
+                    if (std::pow(centerX - x, 2) + std::pow(centerY - y, 2) <= std::pow(chessRadius, 2)) {
+                        canClick = true;
+                        break;
+                    }
+                }
+            }
+            for (const auto &elem: movable) {
+                if (elem.first == row && elem.second == col) {
+                    if (std::pow(centerX - x, 2) + std::pow(centerY - y, 2) <= std::pow(chessRadius, 2)) {
+                        canClick = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (canClick) {
+            const int row = (mousePos.y() - DELTA_Y) / cellSize;
+            const int col = (mousePos.x() - DELTA_X) / cellSize;
             if (chessColor[row][col] == current_player) {
                 selectedPieceRow = row;
                 selectedPieceCol = col;
@@ -778,6 +809,10 @@ void QtBoard::handleEatable(const QByteArray &info) {
 void QtBoard::mouseMoveEvent(QMouseEvent *event) {
     QWidget::mouseMoveEvent(event);
     QPoint mousePos = event->pos();
+    if ((gameCount % 2 == 0) ^ (current_player != BLACK)) {
+        QApplication::setOverrideCursor(Qt::ArrowCursor);
+        return;
+    }
     // qDebug() << mousePos;
     // Translate the coordinates.
     const int x = mousePos.x(), y = mousePos.y();

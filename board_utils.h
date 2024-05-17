@@ -112,6 +112,7 @@ private:
     bool shouldCheckAnimation = false;
     int extraX = -1, extraY = -1;
     int currentStep;
+    int gameCount = 0;
 };
 
 #endif // QTBOARD_H

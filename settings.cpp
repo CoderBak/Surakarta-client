@@ -1,5 +1,5 @@
-// SettingsWidget.cpp
 #include "settings.h"
+#include <QFileDialog>
 
 Settings::Settings(QWidget *parent) :
         QWidget(parent) {
@@ -15,6 +15,7 @@ Settings::Settings(QWidget *parent) :
     QRadioButton* colorRedButton = new QRadioButton("Red", this);
     QRadioButton* colorYellowButton = new QRadioButton("Yellow", this);
     QRadioButton* colorBlueButton = new QRadioButton("Blue", this);
+    QPushButton* selectDir = new QPushButton("Select log dir", this);
     // Add buttons to button group with corresponding ids
     sizeButtonGroup->addButton(size6Button, 6);
     sizeButtonGroup->addButton(size8Button, 8);
@@ -29,6 +30,8 @@ Settings::Settings(QWidget *parent) :
 
 
     // 创建应用按钮
+    fileDir = new QLineEdit();
+    fileDir->setReadOnly(true);
     applyButton = new QPushButton("Apply", this);
 
     // 布局
@@ -40,15 +43,19 @@ Settings::Settings(QWidget *parent) :
     layout->addWidget(colorYellowButton);
     layout->addWidget(colorBlueButton);
     layout->addWidget(slider);
+    layout->addWidget(selectDir);
+    layout->addWidget(fileDir);
     layout->addWidget(applyButton);
     setLayout(layout);
 
     // 连接信号槽
     connect(applyButton, &QPushButton::clicked, this, &Settings::applyButtonClicked);
     connect(applyButton, &QPushButton::clicked, this, &Settings::handleColorRadioButtonClicked);
+
+    connect(selectDir, &QPushButton::clicked, this, &Settings::selectDir);
 }
 
-void Settings::handleColorRadioButtonClicked(int val) {
+void Settings::handleColorRadioButtonClicked() {
     // 发送颜色选中的首字母信号
     QAbstractButton * selectedButton = colorButtonGroup->checkedButton();
     QString colorText = selectedButton->text();
@@ -57,7 +64,7 @@ void Settings::handleColorRadioButtonClicked(int val) {
     emit colorSelected(colorInitial);
 }
 
-void Settings::applyButtonClicked(int value) {
+void Settings::applyButtonClicked() {
     // 获取当前选中的按钮
     QAbstractButton * selectedButton = sizeButtonGroup->checkedButton();
     if (selectedButton) {
@@ -73,4 +80,10 @@ void Settings::applyButtonClicked(int value) {
     }
 }
 
-
+void Settings::selectDir() {
+    QString folderPath = QFileDialog::getExistingDirectory(this, "Select Folder");
+    if (!folderPath.isEmpty()) {
+        fileDir->setText(folderPath);
+        qDebug () << folderPath;
+    }
+}

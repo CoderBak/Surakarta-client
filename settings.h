@@ -7,6 +7,7 @@
 #include<QVBoxLayout>
 #include <QRadioButton>
 #include <QButtonGroup>
+#include <QLineEdit>
 
 class Settings : public QWidget {
     Q_OBJECT
@@ -24,16 +25,18 @@ public:
 private
     slots:
 
-            void applyButtonClicked(int
-    value);
+            void applyButtonClicked();
 
-    void handleColorRadioButtonClicked(int val);
+    void handleColorRadioButtonClicked();
+
+    void selectDir();
 
 private:
     QSlider *slider;
     QPushButton *applyButton;
     QButtonGroup *sizeButtonGroup;
     QButtonGroup *colorButtonGroup;
+    QLineEdit *fileDir;
 
 
 };

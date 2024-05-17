@@ -9,13 +9,15 @@ Settings::Settings(QWidget *parent) :
     sizeButtonGroup = new QButtonGroup(this);
     colorButtonGroup = new QButtonGroup(this);
     // Create size radio buttons
-    QRadioButton * size6Button = new QRadioButton("6x6", this);
-    QRadioButton * size10Button = new QRadioButton("10x10", this);
-    QRadioButton * colorRedButton = new QRadioButton("Red", this);
-    QRadioButton * colorYellowButton = new QRadioButton("Yellow", this);
-    QRadioButton * colorBlueButton = new QRadioButton("Blue", this);
+    QRadioButton* size6Button = new QRadioButton("6x6", this);
+    QRadioButton* size8Button = new QRadioButton("8x8", this);
+    QRadioButton* size10Button = new QRadioButton("10x10", this);
+    QRadioButton* colorRedButton = new QRadioButton("Red", this);
+    QRadioButton* colorYellowButton = new QRadioButton("Yellow", this);
+    QRadioButton* colorBlueButton = new QRadioButton("Blue", this);
     // Add buttons to button group with corresponding ids
     sizeButtonGroup->addButton(size6Button, 6);
+    sizeButtonGroup->addButton(size8Button, 8);
     sizeButtonGroup->addButton(size10Button, 10);
     colorButtonGroup->addButton(colorRedButton);
     colorButtonGroup->addButton(colorYellowButton);
@@ -32,6 +34,7 @@ Settings::Settings(QWidget *parent) :
     // 布局
     QVBoxLayout * layout = new QVBoxLayout(this);
     layout->addWidget(size6Button);
+    layout->addWidget(size8Button);
     layout->addWidget(size10Button);
     layout->addWidget(colorRedButton);
     layout->addWidget(colorYellowButton);

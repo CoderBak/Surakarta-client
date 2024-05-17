@@ -25,7 +25,8 @@ QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
 
 void QtBoard::setHandledByAI(bool enabled) {
     handledByAI = enabled;
-    qDebug() << " handledByAI = " << handledByAI;
+    emit sendAIQuery(handledByAI);
+    qDebug() << "handledByAI = " << handledByAI;
 }
 
 QtBoard::~QtBoard() {
@@ -55,6 +56,14 @@ void QtBoard::receiveDataFromUser(int value, char piece_color) {
     if (piece_color != 0)
         qDebug() << "piece_color = " << piece_color;
 
+}
+
+void MainWindow::handleAIQuery(bool isAI) {
+    if (isAI) {
+        socket->write("$A1");
+    } else {
+        socket->write("$A0");
+    }
 }
 
 // Send the pressed information.
@@ -89,8 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::MainWindow),
         socket(new QTcpSocket(this)),
-        board(new QtBoard(this)),
-        setting(new Settings(this)) {
+        board(new QtBoard(this)) {
 
     ui->setupUi(this);
 
@@ -215,6 +223,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(board, &QtBoard::sendMovableQuery, this, &MainWindow::handleMovableQuery);
     connect(board, &QtBoard::sendEatableQuery, this, &MainWindow::handleEatableQuery);
     connect(board, &QtBoard::sendMoveInfo, this, &MainWindow::handleMoveInfo);
+    connect(board, &QtBoard::sendAIQuery, this, &MainWindow::handleAIQuery);
     connect(this, &MainWindow::sendEatable, board, &QtBoard::handleEatable);
     connect(this, &MainWindow::sendMovable, board, &QtBoard::handleMovable);
     connect(ui->tryAgainButton, &QPushButton::clicked, this, &MainWindow::sendTryAgain);

@@ -40,6 +40,8 @@ private slots:
 
     void handleEatableQuery(const posType &pos);
 
+    void handleAIQuery(bool isAI);
+
     void handleMovableQuery(const posType &pos);
 
     void handleMoveInfo(const QByteArray &);
@@ -97,7 +99,6 @@ private:
     QString ip = "127.0.0.1";
     Ui::MainWindow *ui;
     NetworkSocket *socket1;
-    Settings *setting;
     QTcpSocket *socket;
     QtBoard *board;
     QByteArray msg;

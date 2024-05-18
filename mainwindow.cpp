@@ -375,6 +375,12 @@ void MainWindow::dataHandler(const QByteArray &info) {
             board->processBoardInfo(info.mid(1));
             break;
         }
+        case 'L': {
+            QString title = QString::fromUtf8(info.mid(1, 17));
+            QString log = QString::fromUtf8(info.mid(18));
+            qDebug() << "Received title" << title;
+            qDebug() << "Received log" << log;
+        }
         default:
             return;
     }

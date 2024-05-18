@@ -18,12 +18,6 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         board_utils.h
-        NetworkLibrary/networkdata.cpp
-        NetworkLibrary/networkdata.h
-        NetworkLibrary/networkserver.cpp
-        NetworkLibrary/networkserver.h
-        NetworkLibrary/networksocket.cpp
-        NetworkLibrary/networksocket.h
         startmenu.h
         startmenu.cpp
         resources.qrc

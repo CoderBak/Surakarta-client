@@ -19,9 +19,11 @@ public:
 
     ~StartMenu();
 
-    signals:
+    //bool isStart;
 
-            void startGame();
+signals:
+
+    void startGame();
 
     void humanVsAI();
 
@@ -30,10 +32,9 @@ public:
     void reshow();
 
 
-private
-    slots:
+private slots:
 
-            void handleStartButtonClicked();
+    void handleStartButtonClicked();
 
     void handleSettings();
 

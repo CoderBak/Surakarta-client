@@ -34,6 +34,8 @@ public:
 
     explicit MainWindow(QWidget *parent = nullptr);
 
+    void startNow();
+
     ~MainWindow() override;
 
 private slots:
@@ -65,7 +67,6 @@ private slots:
     void receiveMessage(NetworkData data);
 
 public slots:
-
 
     void handleCheckBoxStateChanged(int state);
 

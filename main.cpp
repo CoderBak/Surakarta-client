@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
     QObject::connect(&menu, &StartMenu::startGame, [&]() {
         menu.hide();
         w.show();
+        w.startNow();
         // w.startGame();
     });
     QObject::connect(&menu, &StartMenu::humanVsAI, [&]() {

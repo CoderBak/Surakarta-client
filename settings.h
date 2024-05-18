@@ -17,15 +17,13 @@ public:
 
     signals:
 
-            void settingsApplied(int
-    value);
+    void settingsApplied(int value);
 
     void colorSelected(char color);
 
-private
-    slots:
+private slots:
 
-            void applyButtonClicked();
+    void applyButtonClicked();
 
     void handleColorRadioButtonClicked();
 
@@ -37,8 +35,6 @@ private:
     QButtonGroup *sizeButtonGroup;
     QButtonGroup *colorButtonGroup;
     QLineEdit *fileDir;
-
-
 };
 
 #endif // SETTINGS_H

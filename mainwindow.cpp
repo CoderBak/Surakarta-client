@@ -234,6 +234,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getData);
     //connect(socket, &QTcpSocket::readyRead, this, &MainWindow::getTimeData);
 
+    //connect(startMenu->startButton,&QPushButton::clicked,this,&MainWindow::startNow);
+}
+
+MainWindow::~MainWindow() {
+    delete ui;
+}
+
+void MainWindow::startNow()
+{
     socket->connectToHost("localhost", PORT);
     if (!socket->waitForConnected()) {
         qDebug() << "Failed to connect to remote host, try to connect localhost";
@@ -245,10 +254,6 @@ MainWindow::MainWindow(QWidget *parent) :
     } else {
         qDebug() << "Remote host connected successfully!";
     }
-}
-
-MainWindow::~MainWindow() {
-    delete ui;
 }
 
 void MainWindow::sendTryAgain() {

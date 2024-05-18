@@ -6,7 +6,8 @@
 
 StartMenu::StartMenu(QWidget *parent) :
         QWidget(parent),
-        ui(new Ui::StartMenu) {
+        ui(new Ui::StartMenu)
+        {
     ui->setupUi(this);
     // Create the layout for the start menu
     // QVBoxLayout * layout = new QVBoxLayout(this);
@@ -54,6 +55,7 @@ StartMenu::~StartMenu() {
 }
 
 void StartMenu::handleStartButtonClicked() {
+    //isStart=true;
     emit startGame();
 }
 

@@ -8,8 +8,6 @@
 #include <QTimer>
 #include "board_utils.h"
 #include <QtWidgets/QLineEdit>
-#include "NetworkLibrary/networksocket.h"
-#include "NetworkLibrary/networkdata.h"
 #include "startmenu.h"
 #include "settings.h"
 
@@ -56,16 +54,6 @@ private slots:
 
     void getData();
 
-    void connectToServer();
-
-    void connectedSuccessfully();
-
-    void disconnectFromServer();
-
-    void sendMessage();
-
-    void receiveMessage(NetworkData data);
-
 public slots:
 
     void handleCheckBoxStateChanged(int state);
@@ -96,10 +84,7 @@ signals:
 private:
     void dataHandler(const QByteArray &info);
 
-    int port = 1233;
-    QString ip = "127.0.0.1";
     Ui::MainWindow *ui;
-    NetworkSocket *socket1;
     QTcpSocket *socket;
     QtBoard *board;
     QByteArray msg;

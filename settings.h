@@ -21,6 +21,8 @@ public:
 
     void colorSelected(char color);
 
+    void dirSelected(QString dir);
+
 private slots:
 
     void applyButtonClicked();
@@ -29,12 +31,15 @@ private slots:
 
     void selectDir();
 
+    void handleDirSend();
+
 private:
     QSlider *slider;
     QPushButton *applyButton;
     QButtonGroup *sizeButtonGroup;
     QButtonGroup *colorButtonGroup;
     QLineEdit *fileDir;
+    QString selectedDir = "./log";
 };
 
 #endif // SETTINGS_H

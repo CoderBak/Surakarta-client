@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
     // QObject::connect(&setting, &Settings::settingsApplied, board, &QtBoard::receiveDataFromUser);
     QObject::connect(&setting, &Settings::settingsApplied, &w, &MainWindow::receiveBoardSizeFromSettings);
     QObject::connect(&setting, &Settings::colorSelected, &w, &MainWindow::receivePieceColorFromSettings);
+    QObject::connect(&setting, &Settings::dirSelected, &w, &MainWindow::receiveDirFromSettings);
     menu.show();
     // w.show();
     return QApplication::exec();

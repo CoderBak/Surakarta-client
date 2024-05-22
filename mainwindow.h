@@ -29,6 +29,7 @@ public:
     QPushButton *disconnect_button;
     QMenuBar *menubar;
     QStatusBar *statusbar;
+    QString savePlace = "./log";
 
     explicit MainWindow(QWidget *parent = nullptr);
 
@@ -61,6 +62,8 @@ public slots:
     void receiveBoardSizeFromSettings(int size);
 
     void receivePieceColorFromSettings(char color);
+
+    void receiveDirFromSettings(QString dir);
     //  void showStartMenu();
 
     //  void startGame();

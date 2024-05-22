@@ -23,11 +23,11 @@ Settings::Settings(QWidget *parent) :
     colorButtonGroup->addButton(colorRedButton);
     colorButtonGroup->addButton(colorYellowButton);
     colorButtonGroup->addButton(colorBlueButton);
+    size6Button->setChecked(true);
+    colorRedButton->setChecked(true);
 
     // Connect size button group signal to slot
     // connect(sizeButtonGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(applyButtonClicked()));
-
-
 
     // 创建应用按钮
     fileDir = new QLineEdit();
@@ -36,12 +36,19 @@ Settings::Settings(QWidget *parent) :
 
     // 布局
     QVBoxLayout * layout = new QVBoxLayout(this);
-    layout->addWidget(size6Button);
-    layout->addWidget(size8Button);
-    layout->addWidget(size10Button);
-    layout->addWidget(colorRedButton);
-    layout->addWidget(colorYellowButton);
-    layout->addWidget(colorBlueButton);
+    QVBoxLayout * size = new QVBoxLayout();
+    QVBoxLayout * color = new QVBoxLayout();
+    QHBoxLayout * horizon = new QHBoxLayout();
+
+    size->addWidget(size6Button);
+    size->addWidget(size8Button);
+    size->addWidget(size10Button);
+    color->addWidget(colorRedButton);
+    color->addWidget(colorYellowButton);
+    color->addWidget(colorBlueButton);
+    horizon->addLayout(size);
+    horizon->addLayout(color);
+    layout->addLayout(horizon);
     layout->addWidget(slider);
     layout->addWidget(selectDir);
     layout->addWidget(fileDir);
@@ -51,17 +58,20 @@ Settings::Settings(QWidget *parent) :
     // 连接信号槽
     connect(applyButton, &QPushButton::clicked, this, &Settings::applyButtonClicked);
     connect(applyButton, &QPushButton::clicked, this, &Settings::handleColorRadioButtonClicked);
-
+    connect(applyButton, &QPushButton::clicked, this, &Settings::handleDirSend);
+    connect(applyButton, &QPushButton::clicked, this, [this]() { this->hide(); });
     connect(selectDir, &QPushButton::clicked, this, &Settings::selectDir);
 }
 
 void Settings::handleColorRadioButtonClicked() {
     // 发送颜色选中的首字母信号
     QAbstractButton * selectedButton = colorButtonGroup->checkedButton();
-    QString colorText = selectedButton->text();
-    char colorInitial = colorText.at(0).toLatin1();
-    qDebug() << "emit value of color && color =" << colorInitial;
-    emit colorSelected(colorInitial);
+    if (selectedButton) {
+        QString colorText = selectedButton->text();
+        char colorInitial = colorText.at(0).toLatin1();
+        qDebug() << "emit value of color && color =" << colorInitial;
+        emit colorSelected(colorInitial);
+    }
 }
 
 void Settings::applyButtonClicked() {
@@ -84,6 +94,11 @@ void Settings::selectDir() {
     QString folderPath = QFileDialog::getExistingDirectory(this, "Select Folder");
     if (!folderPath.isEmpty()) {
         fileDir->setText(folderPath);
-        qDebug () << folderPath;
+        selectedDir = folderPath;
+        //qDebug () << folderPath;
     }
+}
+
+void Settings::handleDirSend() {
+    emit dirSelected(selectedDir);
 }

@@ -7,7 +7,7 @@
 #include <QMutex>
 
 using posType = std::pair<int, int>;
-constexpr unsigned int BOARD_SIZE = 6;
+constexpr unsigned int BOARD_SIZE = 10;
 constexpr unsigned int maxNoCapture = 40;
 constexpr int WIDTH = 1180;
 constexpr int HEIGHT = 820;

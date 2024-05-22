@@ -10,6 +10,8 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QThread>
+#include <QDir>
+#include <QFile>
 #include "startmenu.h"
 
 QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
@@ -92,6 +94,11 @@ void MainWindow::receiveBoardSizeFromSettings(int size) {
 
 void MainWindow::receivePieceColorFromSettings(char color) {
     board->receiveDataFromUser(0, color);
+}
+
+void MainWindow::receiveDirFromSettings(QString dir) {
+    qDebug() << "dir = " << dir;
+    savePlace = dir;
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -267,6 +274,17 @@ void MainWindow::dataHandler(const QByteArray &info) {
             QString log = QString::fromUtf8(info.mid(18));
             qDebug() << "Received title" << title;
             qDebug() << "Received log" << log;
+            QDir dir;
+            if (!dir.exists(savePlace)) {
+                dir.mkpath(savePlace);
+            }
+            qDebug() << "Trying to save at " << savePlace + "/" + title + ".log";
+            QFile file(savePlace + "/" + title + ".log");
+            if (file.open(QIODevice::WriteOnly)) {
+                QTextStream stream(&file);
+                stream << log;
+                qDebug() << "Log saved";
+            }
         }
         default:
             return;

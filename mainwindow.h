@@ -20,7 +20,6 @@ class MainWindow : public QMainWindow {
 Q_OBJECT
 
 public:
-    QString savePlace = "./log";
     explicit MainWindow(QWidget *parent = nullptr);
     void startNow();
     ~MainWindow() override;
@@ -53,6 +52,7 @@ private:
     QLabel *titleReset = nullptr;
     QLabel *labelTotal = nullptr;
     QLabel *labelReset = nullptr;
+    QString savePlace = "./log";
 };
 
 #endif // MAINWINDOW_H

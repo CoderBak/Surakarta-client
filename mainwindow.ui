@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Surakarta Game</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -55,7 +55,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="Altrusteeship">
+     <widget class="QCheckBox" name="aiHandle">
       <property name="enabled">
        <bool>true</bool>
       </property>

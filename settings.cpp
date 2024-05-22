@@ -1,8 +1,7 @@
 #include "settings.h"
 #include <QFileDialog>
 
-Settings::Settings(QWidget *parent) :
-        QWidget(parent) {
+Settings::Settings(QWidget *parent) : QWidget(parent) {
     slider = new QSlider(Qt::Horizontal, this);
     slider->setRange(0, 100);
     sizeButtonGroup = new QButtonGroup(this);

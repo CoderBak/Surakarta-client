@@ -25,6 +25,11 @@ set(PROJECT_SOURCES
         settings.h
         settings.cpp
         board.h
+        replay.ui
+        replay.h
+        replay.cpp
+        board.cpp
+        replay_board.h
 )
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

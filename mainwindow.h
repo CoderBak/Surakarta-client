@@ -6,10 +6,11 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QTimer>
-#include "board_utils.h"
+#include "common.h"
 #include <QtWidgets/QLineEdit>
 #include "startmenu.h"
 #include "settings.h"
+#include "board.h"
 
 namespace Ui {
     class MainWindow;
@@ -19,69 +20,26 @@ class MainWindow : public QMainWindow {
 Q_OBJECT
 
 public:
-    QLineEdit *ip_edit;
-    QLineEdit *port_edit;
-    QPushButton *connect_button;
-    QLineEdit *send_edit;
-    QPushButton *send_button;
-    QLineEdit *receive_edit;
-    QLabel *label;
-    QPushButton *disconnect_button;
-    QMenuBar *menubar;
-    QStatusBar *statusbar;
     QString savePlace = "./log";
-
     explicit MainWindow(QWidget *parent = nullptr);
-
     void startNow();
-
     ~MainWindow() override;
 
-private slots:
-
-    void handleEatableQuery(const posType &pos);
-
-    void handleAIQuery(bool isAI);
-
-    void handleMovableQuery(const posType &pos);
-
-    void handleMoveInfo(const QByteArray &);
-
-    void sendTryAgain();
-
-    // void processData();
-
-    //void animateMove();
-
-    void getData();
-
 public slots:
-
+    void handleEatableQuery(const posType &pos);
+    void handleAIQuery(bool isAI);
+    void handleMovableQuery(const posType &pos);
+    void handleMoveInfo(const QByteArray &);
+    void sendTryAgain();
+    void getData();
     void handleCheckBoxStateChanged(int state);
-
     void receiveBoardSizeFromSettings(int size);
-
     void receivePieceColorFromSettings(char color);
-
     void receiveDirFromSettings(QString dir);
-    //  void showStartMenu();
-
-    //  void startGame();
-
-    // void updateTimeSlot(QString time);
-
-    // void resetTime();
-
-    // void handleTryAgain();
-    // void handleGiveUp();
-    // void handleOpenChatroom();
 
 signals:
-
     void aiControlChanged(bool enabled);
-
     void sendEatable(const QByteArray &info);
-
     void sendMovable(const QByteArray &info);
 
 private:
@@ -95,8 +53,6 @@ private:
     QLabel *titleReset = nullptr;
     QLabel *labelTotal = nullptr;
     QLabel *labelReset = nullptr;
-
-    StartMenu *startMenu;
 };
 
 #endif // MAINWINDOW_H

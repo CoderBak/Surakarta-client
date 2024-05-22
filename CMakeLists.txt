@@ -17,13 +17,14 @@ set(PROJECT_SOURCES
         mainwindow.ui
         mainwindow.cpp
         mainwindow.h
-        board_utils.h
+        common.h
         startmenu.h
         startmenu.cpp
         resources.qrc
         startmenu.ui
         settings.h
         settings.cpp
+        board.h
 )
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

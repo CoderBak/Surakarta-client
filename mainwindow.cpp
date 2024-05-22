@@ -1,9 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "startmenu.h"
 #include <Qpainter>
 #include <QMouseEvent>
 #include <iostream>
-#include <sstream>
 #include <QTextStream>
 #include <QString>
 #include <QCursor>
@@ -12,7 +12,6 @@
 #include <QThread>
 #include <QDir>
 #include <QFile>
-#include "startmenu.h"
 
 QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
     this->installEventFilter(this);
@@ -22,17 +21,12 @@ QtBoard::QtBoard(QWidget *parent) : QWidget(parent) {
             chessColor[i][j] = NONE;
         }
     }
-    // connect(&settings, &Settings::settingsApplied, this, &QtBoard::receiveDataFromUser);
 }
 
 void QtBoard::setHandledByAI(bool enabled) {
     handledByAI = enabled;
     emit sendAIQuery(handledByAI);
     qDebug() << "handledByAI = " << handledByAI;
-}
-
-QtBoard::~QtBoard() {
-    //delete animationTimer;
 }
 
 bool QtBoard::eventFilter(QObject *obj, QEvent *event) {

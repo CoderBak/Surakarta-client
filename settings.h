@@ -2,35 +2,28 @@
 #define SETTINGS_H
 
 #include <QWidget>
-#include<QSlider>
-#include<QPushButton>
-#include<QVBoxLayout>
+#include <QSlider>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include <QRadioButton>
 #include <QButtonGroup>
 #include <QLineEdit>
 
 class Settings : public QWidget {
-    Q_OBJECT
+Q_OBJECT
 
 public:
     explicit Settings(QWidget *parent = nullptr);
 
-    signals:
-
+signals:
     void settingsApplied(int value);
-
     void colorSelected(char color);
-
     void dirSelected(QString dir);
 
 private slots:
-
     void applyButtonClicked();
-
     void handleColorRadioButtonClicked();
-
     void selectDir();
-
     void handleDirSend();
 
 private:

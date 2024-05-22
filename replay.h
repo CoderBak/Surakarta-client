@@ -10,6 +10,7 @@
 #include <QButtonGroup>
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QTimer>
 #include "replay_board.h"
 
 namespace Ui { class Replay; }
@@ -34,6 +35,7 @@ private:
     ReplayBoard *board;
     int step = 0;
     int maxStep;
+    QTimer* timer;
 };
 
 #endif //REPLAY_H

@@ -34,6 +34,7 @@ constexpr Qt::PenStyle emphasizeLine = Qt::DotLine;
 constexpr int maxSecond = 1000;
 const QHostAddress serverIP = QHostAddress("20.212.82.172");
 constexpr int PORT = 1233;
+constexpr int replaySpeed = 600;
 
 enum ChessColor {
     WHITE,

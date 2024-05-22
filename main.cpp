@@ -29,10 +29,15 @@ int main(int argc, char *argv[]) {
             QFile file(fileName);
             if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 QTextStream in(&file);
+                bool flag = false;
                 while (!in.atEnd()) {
                     QString line = in.readLine();
                     if (line[0] == 'B') {
-                        replay.history.push_back(line.mid(1));
+                        if (flag) {
+                            replay.history.push_back(line.mid(1));
+                        } else {
+                            flag = true;
+                        }
                     }
                 }
                 file.close();

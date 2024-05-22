@@ -18,7 +18,7 @@ public:
     }
 
     std::pair<int, int> translateIdx(const unsigned int x, const unsigned int y) {
-        return std::make_pair(DELTA_X + x * cellSize + cellSize / 2, DELTA_Y + y * cellSize + cellSize / 2);
+        return std::make_pair(delta_x + x * cellSize + cellSize / 2, delta_y + y * cellSize + cellSize / 2);
     }
 
     void paintEvent(QPaintEvent *) override {
@@ -29,25 +29,10 @@ public:
         for (int i = 0; i < BOARD_SIZE; i += 1) {
             for (int j = 0; j < BOARD_SIZE; j += 1) {
                 painter.save();
-                painter.drawRect(DELTA_X + i * cellSize, DELTA_Y + j * cellSize, cellSize, cellSize);
+                painter.drawRect(delta_x + i * cellSize, delta_y + j * cellSize, cellSize, cellSize);
                 painter.restore();
             }
         }
-        // Draw arcs at corner.
-        auto drawArcs = [](QPainter &painter, auto centerX, auto centerY, auto startAngle, auto k) {
-            constexpr int endAngle = 270 * 16;
-            painter.setPen(QPen(DEFAULT_COLOR, PEN_WIDTH, Qt::DashLine));
-            for (int i = 1; i <= k; i += 1) {
-                const int radius = i * cellSize;
-                QRectF rect(centerX - radius, centerY - radius, 2 * radius, 2 * radius);
-                painter.drawArc(rect, startAngle, endAngle);
-            }
-            painter.setPen(QPen(DEFAULT_COLOR, PEN_WIDTH));
-        };
-        drawArcs(painter, DELTA_X, DELTA_Y, 0, BOARD_SIZE / 2);
-        drawArcs(painter, DELTA_X + BOARD_HEIGHT, DELTA_Y, 270 * 16, BOARD_SIZE / 2);
-        drawArcs(painter, DELTA_X, DELTA_Y + BOARD_HEIGHT, 90 * 16, BOARD_SIZE / 2);
-        drawArcs(painter, DELTA_X + BOARD_HEIGHT, DELTA_Y + BOARD_HEIGHT, 180 * 16, BOARD_SIZE / 2);
         drawChess();
     }
 
@@ -93,10 +78,11 @@ public:
                 }
             }
         }
-}
+    }
 
 private:
     ChessColor chessColor[BOARD_SIZE][BOARD_SIZE]{};
+    const int delta_x = 20, delta_y = 20;
 };
 
 #endif //REPLAY_BOARD_H

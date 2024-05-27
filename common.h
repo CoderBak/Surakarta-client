@@ -31,6 +31,7 @@ constexpr int selectedSize = 5;
 constexpr int emphasizeSize = 3;
 constexpr Qt::PenStyle selectedLine = Qt::SolidLine;
 constexpr Qt::PenStyle emphasizeLine = Qt::DotLine;
+
 constexpr int maxSecond = 1000;
 const QHostAddress serverIP = QHostAddress("20.212.82.172");
 constexpr int PORT = 1233;

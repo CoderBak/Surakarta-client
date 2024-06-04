@@ -1,3 +1,7 @@
+// This is our mainwindow.
+// The window is designed for users to see when chess competing.
+// We support the UI for board, a timer, and other buttoms for users to control the game.
+// Only special functions will we give explanations.
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -12,12 +16,14 @@
 #include "settings.h"
 #include "board.h"
 
-namespace Ui {
+namespace Ui
+{
     class MainWindow;
 }
 
-class MainWindow : public QMainWindow {
-Q_OBJECT
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -25,18 +31,23 @@ public:
     ~MainWindow() override;
 
 public slots:
+    // handle functions are used to process data
     void handleEatableQuery(const posType &pos);
     void handleAIQuery(bool isAI);
     void handleMovableQuery(const posType &pos);
     void handleMoveInfo(const QByteArray &);
-    void sendTryAgain();
-    void getData();
     void handleCheckBoxStateChanged(int state);
+
+    void sendTryAgain();
+
+    // These functions are used to receive data
+    void getData();
     void receiveBoardSizeFromSettings(int size);
     void receivePieceColorFromSettings(char color);
     void receiveDirFromSettings(QString dir);
 
 signals:
+    // these signals are to send data
     void aiControlChanged(bool enabled);
     void sendEatable(const QByteArray &info);
     void sendMovable(const QByteArray &info);

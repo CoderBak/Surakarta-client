@@ -1,4 +1,7 @@
 // In this file, we define const.
+// These const value are defined for both server and client.
+// We use it to intialize some basic or unchanged things.
+// We believe the name of const has already explained its meaning.
 #ifndef COMMON_H
 #define COMMON_H
 
@@ -37,7 +40,8 @@ const QHostAddress serverIP = QHostAddress("20.212.82.172");
 constexpr int PORT = 1233;
 constexpr int replaySpeed = 600;
 
-enum ChessColor {
+enum ChessColor
+{
     WHITE,
     BLACK,
     NONE

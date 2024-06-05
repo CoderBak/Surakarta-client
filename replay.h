@@ -1,4 +1,5 @@
 // In this file, we define our replay engine.
+// Only special functions will we give explanations.
 #ifndef REPLAY_H
 #define REPLAY_H
 
@@ -13,18 +14,24 @@
 #include <QTimer>
 #include "replay_board.h"
 
-namespace Ui { class Replay; }
+namespace Ui
+{
+    class Replay;
+}
 
-class Replay : public QWidget {
-Q_OBJECT
+class Replay : public QWidget
+{
+    Q_OBJECT
 
 public:
     explicit Replay(QWidget *parent = nullptr);
     ~Replay() override;
+    // We use a Qstring to record history and replay
     std::vector<QString> history;
     void print();
 
 public slots:
+    // functions for recording back and next and processing it
     void stepBack();
     void stepNext();
     void handleStart();
@@ -35,7 +42,7 @@ private:
     ReplayBoard *board;
     int step = 0;
     int maxStep;
-    QTimer* timer;
+    QTimer *timer;
 };
 
-#endif //REPLAY_H
+#endif // REPLAY_H

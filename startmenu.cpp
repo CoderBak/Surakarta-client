@@ -4,31 +4,37 @@
 #include <QStyleOption>
 #include <QPainter>
 
-StartMenu::StartMenu(QWidget *parent) :
-        QWidget(parent),
-        ui(new Ui::StartMenu) {
+StartMenu::StartMenu(QWidget *parent) : QWidget(parent),
+                                        ui(new Ui::StartMenu)
+{
     ui->setupUi(this);
+    // connect buttons with functions on menu
     connect(ui->startButton, &QPushButton::clicked, this, &StartMenu::handleStartButtonClicked);
     connect(ui->humanVsAIButton, &QPushButton::clicked, this, &StartMenu::humanVsAI);
     connect(ui->settingsButton, &QPushButton::clicked, this, &StartMenu::settings);
     connect(ui->reshowButton, &QPushButton::clicked, this, &StartMenu::reshow);
 }
 
-void StartMenu::paintEvent(QPaintEvent *event) {
+// paint start menu
+void StartMenu::paintEvent(QPaintEvent *event)
+{
     QStyleOption opt;
     opt.initFrom(this);
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
 
-StartMenu::~StartMenu() {
+StartMenu::~StartMenu()
+{
     delete ui;
 }
 
-void StartMenu::handleStartButtonClicked() {
+void StartMenu::handleStartButtonClicked()
+{
     emit startGame();
 }
 
-void StartMenu::handleSettings() {
+void StartMenu::handleSettings()
+{
     emit settings();
 }

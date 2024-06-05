@@ -1,3 +1,5 @@
+// In this file, we implement the settings for users to  customize their own game.
+// Only special functions will we give explanations.
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
@@ -9,18 +11,22 @@
 #include <QButtonGroup>
 #include <QLineEdit>
 
-class Settings : public QWidget {
-Q_OBJECT
+class Settings : public QWidget
+{
+    Q_OBJECT
 
 public:
+    // constructor
     explicit Settings(QWidget *parent = nullptr);
 
 signals:
+    // send signals conveying users need
     void settingsApplied(int value);
     void colorSelected(char color);
     void dirSelected(QString dir);
 
 private slots:
+    // process certain situations
     void applyButtonClicked();
     void handleColorRadioButtonClicked();
     void selectDir();

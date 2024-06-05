@@ -1,3 +1,6 @@
+// In this file, we implement the start menu for users.
+// Users will first see the start menu and then click buttom to get into mainwindow and compete.
+// Only special functions will we give explanations.
 #ifndef STARTMENU_H
 #define STARTMENU_H
 
@@ -6,12 +9,14 @@
 #include <QLabel>
 #include "ui_startmenu.h"
 
-namespace Ui {
+namespace Ui
+{
     class StartMenu;
 }
 
-class StartMenu : public QWidget {
-Q_OBJECT
+class StartMenu : public QWidget
+{
+    Q_OBJECT
 
 public:
     explicit StartMenu(QWidget *parent = nullptr);
@@ -19,12 +24,14 @@ public:
     ~StartMenu() override;
 
 signals:
+    //  We support these functions
     void startGame();
     void humanVsAI();
     void settings();
     void reshow();
 
 private slots:
+    // slots for processing
     void handleStartButtonClicked();
     void handleSettings();
 

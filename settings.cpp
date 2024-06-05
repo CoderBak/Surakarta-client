@@ -1,7 +1,10 @@
 #include "settings.h"
 #include <QFileDialog>
 
-Settings::Settings(QWidget *parent) : QWidget(parent) {
+Settings::Settings(QWidget *parent) : QWidget(parent)
+{
+    // below are initializing the settings
+    // place some buttons and widgets
     slider = new QSlider(Qt::Horizontal, this);
     slider->setRange(0, 100);
     sizeButtonGroup = new QButtonGroup(this);
@@ -47,16 +50,21 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
     layout->addWidget(applyButton);
     setLayout(layout);
 
+    // connect signals and slots
     connect(applyButton, &QPushButton::clicked, this, &Settings::applyButtonClicked);
     connect(applyButton, &QPushButton::clicked, this, &Settings::handleColorRadioButtonClicked);
     connect(applyButton, &QPushButton::clicked, this, &Settings::handleDirSend);
-    connect(applyButton, &QPushButton::clicked, this, [this]() { this->hide(); });
+    connect(applyButton, &QPushButton::clicked, this, [this]()
+            { this->hide(); });
     connect(selectDir, &QPushButton::clicked, this, &Settings::selectDir);
 }
 
-void Settings::handleColorRadioButtonClicked() {
-    QAbstractButton * selectedButton = colorButtonGroup->checkedButton();
-    if (selectedButton) {
+// process certain color
+void Settings::handleColorRadioButtonClicked()
+{
+    QAbstractButton *selectedButton = colorButtonGroup->checkedButton();
+    if (selectedButton)
+    {
         QString colorText = selectedButton->text();
         char colorInitial = colorText.at(0).toLatin1();
         qDebug() << "emit value of color && color =" << colorInitial;
@@ -64,9 +72,12 @@ void Settings::handleColorRadioButtonClicked() {
     }
 }
 
-void Settings::applyButtonClicked() {
-    QAbstractButton * selectedButton = sizeButtonGroup->checkedButton();
-    if (selectedButton) {
+// process certain size
+void Settings::applyButtonClicked()
+{
+    QAbstractButton *selectedButton = sizeButtonGroup->checkedButton();
+    if (selectedButton)
+    {
         QString buttonText = selectedButton->text();
         int value = buttonText.split("x").first().toInt();
         qDebug() << "emit value of size && value =" << value;
@@ -74,14 +85,19 @@ void Settings::applyButtonClicked() {
     }
 }
 
-void Settings::selectDir() {
+// select a directory
+void Settings::selectDir()
+{
     QString folderPath = QFileDialog::getExistingDirectory(this, "Select Folder");
-    if (!folderPath.isEmpty()) {
+    if (!folderPath.isEmpty())
+    {
         fileDir->setText(folderPath);
         selectedDir = folderPath;
     }
 }
 
-void Settings::handleDirSend() {
+// send the directory
+void Settings::handleDirSend()
+{
     emit dirSelected(selectedDir);
 }

@@ -22,11 +22,11 @@
 
 以下是根据 `commit` 记录整理的开发日志，请查阅 `report1~3.md` 来获取之前的三次小报告.
 
-- 孙浩翔：`CoderBak` ，[https://github.com/CoderBak](https://github.com/CoderBak)
+- 孙浩翔 2023202305 ：`CoderBak` ，[https://github.com/CoderBak](https://github.com/CoderBak)
 
-- 张昕跃：`imio21777` ，[https://github.com/imio21777](https://github.com/imio21777)
+- 张昕跃 2023202300 ：`imio21777` ，[https://github.com/imio21777](https://github.com/imio21777)
 
-- 王燚：`smallsmallprogrammer` ，[https://github.com/smallsmallprogrammer](https://github.com/smallsmallprogrammer)
+- 王燚　 2023202262 ：`smallsmallprogrammer` ，[https://github.com/smallsmallprogrammer](https://github.com/smallsmallprogrammer)
 
 ---
 

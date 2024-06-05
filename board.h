@@ -1,14 +1,13 @@
 // In this file, we define the QtBoard class.
-// All the fuctions are named according to their functionalities.
+// All the functions are named according to their functionalities.
 // Only special functions will we give explanations.
 #ifndef BOARD_H
 #define BOARD_H
 
 #include "common.h"
 
-class QtBoard : public QWidget
-{
-    Q_OBJECT
+class QtBoard : public QWidget {
+Q_OBJECT
 
 public:
     explicit QtBoard(QWidget *parent);
@@ -38,8 +37,8 @@ public slots:
     void handleMovable(const QByteArray &);
 
 private:
-    // these are parameters for the board and boardinfo
-    ChessColor chessColor[BOARD_SIZE][BOARD_SIZE];
+    // these are parameters for the board and boardInfo
+    ChessColor chessColor[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
     ChessColor current_player;
 
     // movable is a vector of positions
@@ -61,7 +60,7 @@ private:
     // We use a vector to store the path of positions
     const std::vector<posType> *currentPath;
 
-    // Bools for judgement
+    // judgement
     // These are for replay animation and AI control
     bool handledByAI = false, inAnimation = false;
     bool shouldCheckAnimation = false;

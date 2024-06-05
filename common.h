@@ -1,6 +1,6 @@
 // In this file, we define const.
 // These const value are defined for both server and client.
-// We use it to intialize some basic or unchanged things.
+// We use it to initialize some basic or unchanged things.
 // We believe the name of const has already explained its meaning.
 #ifndef COMMON_H
 #define COMMON_H
@@ -12,6 +12,7 @@
 using posType = std::pair<int, int>;
 
 constexpr unsigned int BOARD_SIZE = 10;
+constexpr unsigned int MAX_BOARD_SIZE = 10;
 constexpr unsigned int maxNoCapture = 40;
 constexpr int WIDTH = 1180;
 constexpr int HEIGHT = 820;
@@ -36,8 +37,8 @@ constexpr Qt::PenStyle selectedLine = Qt::SolidLine;
 constexpr Qt::PenStyle emphasizeLine = Qt::DotLine;
 
 constexpr int maxSecond = 1000;
-const QHostAddress serverIP = QHostAddress("20.212.82.172");
-constexpr int PORT = 1233;
+const QString serverIP = QString("localhost");
+constexpr int PORT = 3456;
 constexpr int replaySpeed = 600;
 
 enum ChessColor

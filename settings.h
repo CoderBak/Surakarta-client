@@ -11,9 +11,8 @@
 #include <QButtonGroup>
 #include <QLineEdit>
 
-class Settings : public QWidget
-{
-    Q_OBJECT
+class Settings : public QWidget {
+Q_OBJECT
 
 public:
     // constructor

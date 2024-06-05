@@ -6,8 +6,7 @@
 #include <QPainter>
 
 Replay::Replay(QWidget *parent) : QWidget(parent), ui(new Ui::Replay),
-                                  board(new ReplayBoard(this)), timer(new QTimer(this))
-{
+                                  board(new ReplayBoard(this)), timer(new QTimer(this)) {
     ui->setupUi(this);
     this->layout()->addWidget(board);
     board->setFixedSize(BOARD_HEIGHT + 40, BOARD_HEIGHT + 40);
@@ -21,36 +20,30 @@ Replay::Replay(QWidget *parent) : QWidget(parent), ui(new Ui::Replay),
     this->setFixedSize(this->size());
 }
 
-Replay::~Replay()
-{
+Replay::~Replay() {
     delete ui;
 }
 
-void Replay::handleStart()
-{
+void Replay::handleStart() {
     timer->start(replaySpeed);
 }
 
-void Replay::handleStop()
-{
+void Replay::handleStop() {
     timer->stop();
 }
 
-void Replay::stepNext()
-{
+void Replay::stepNext() {
     step += 1;
     print();
 }
 
-void Replay::stepBack()
-{
+void Replay::stepBack() {
     step -= 1;
     print();
 }
 
 // calculate the step
-void Replay::print()
-{
+void Replay::print() {
     maxStep = static_cast<int>(history.size());
     step = (step % maxStep + maxStep) % maxStep;
     board->processBoardInfo(history[step].toUtf8());

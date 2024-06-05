@@ -1,8 +1,7 @@
 #include "settings.h"
 #include <QFileDialog>
 
-Settings::Settings(QWidget *parent) : QWidget(parent)
-{
+Settings::Settings(QWidget *parent) : QWidget(parent) {
     // below are initializing the settings
     // place some buttons and widgets
     slider = new QSlider(Qt::Horizontal, this);
@@ -54,17 +53,14 @@ Settings::Settings(QWidget *parent) : QWidget(parent)
     connect(applyButton, &QPushButton::clicked, this, &Settings::applyButtonClicked);
     connect(applyButton, &QPushButton::clicked, this, &Settings::handleColorRadioButtonClicked);
     connect(applyButton, &QPushButton::clicked, this, &Settings::handleDirSend);
-    connect(applyButton, &QPushButton::clicked, this, [this]()
-            { this->hide(); });
+    connect(applyButton, &QPushButton::clicked, this, [this]() { this->hide(); });
     connect(selectDir, &QPushButton::clicked, this, &Settings::selectDir);
 }
 
 // process certain color
-void Settings::handleColorRadioButtonClicked()
-{
+void Settings::handleColorRadioButtonClicked() {
     QAbstractButton *selectedButton = colorButtonGroup->checkedButton();
-    if (selectedButton)
-    {
+    if (selectedButton) {
         QString colorText = selectedButton->text();
         char colorInitial = colorText.at(0).toLatin1();
         qDebug() << "emit value of color && color =" << colorInitial;
@@ -73,11 +69,9 @@ void Settings::handleColorRadioButtonClicked()
 }
 
 // process certain size
-void Settings::applyButtonClicked()
-{
+void Settings::applyButtonClicked() {
     QAbstractButton *selectedButton = sizeButtonGroup->checkedButton();
-    if (selectedButton)
-    {
+    if (selectedButton) {
         QString buttonText = selectedButton->text();
         int value = buttonText.split("x").first().toInt();
         qDebug() << "emit value of size && value =" << value;
@@ -86,18 +80,15 @@ void Settings::applyButtonClicked()
 }
 
 // select a directory
-void Settings::selectDir()
-{
+void Settings::selectDir() {
     QString folderPath = QFileDialog::getExistingDirectory(this, "Select Folder");
-    if (!folderPath.isEmpty())
-    {
+    if (!folderPath.isEmpty()) {
         fileDir->setText(folderPath);
         selectedDir = folderPath;
     }
 }
 
 // send the directory
-void Settings::handleDirSend()
-{
+void Settings::handleDirSend() {
     emit dirSelected(selectedDir);
 }

@@ -14,19 +14,17 @@
 #include <QTimer>
 #include "replay_board.h"
 
-namespace Ui
-{
+namespace Ui {
     class Replay;
 }
 
-class Replay : public QWidget
-{
-    Q_OBJECT
+class Replay : public QWidget {
+Q_OBJECT
 
 public:
     explicit Replay(QWidget *parent = nullptr);
     ~Replay() override;
-    // We use a Qstring to record history and replay
+    // We use a QString to record history and replay
     std::vector<QString> history;
     void print();
 

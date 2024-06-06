@@ -6,17 +6,77 @@
 
 我们使用 `C++ Qt` 设计并实现了 Surakarta（苏腊卡尔塔棋）游戏. 在设计上分为前端 [Surakarta-client](https://github.com/CoderBak/Surakarta-client) 与 后端 [Surakarta-server](https://github.com/CoderBak/Surakarta-server) ，支持跨平台联机对战，AI 托管等功能. 其中，跨平台联机对战功能已经在 Linux 作为服务器，Windows 和 Mac 作为客户端的环境下进行测试. 仓库将在提交 ddl 后设置为 Public.
 
+游戏演示视频：[https://www.bilibili.com/video/BV1fr421F7J6](https://www.bilibili.com/video/BV1fr421F7J6) .
+
 项目总网站：[https://github.com/panjd123/Surakarta](https://github.com/panjd123/Surakarta) ，感谢助教提供的框架与自动测试，欢迎 star ~
 
-## 结构设计
+## 具体设计
 
-### 整体框架
+下图中，一个方形框代表一个类，一个圆角矩形代表一个槽，一个对角圆角矩形代表一个常规函数.
 
-### 棋盘框架
+### Server 框架
+
+![](imgs/fig7.png)
+
+### Client 框架
+
+![](imgs/fig6.png)
+
+### 详细解释
+
+下面我们将以一局游戏为例，大致介绍我们的结构（更多细节例如按钮的连接暂时略去）：
+
+- 设置按钮被点击，进入设置界面.
+
+- 设置完成后，点击 `Apply` ，向 `MainWindow` 发送设置的具体内容.
+
+---
+
+- 回放按钮被点击，选择回放文件.
+
+- `Replay` 界面中包含了 `ReplayBoard` 控件，前者向后者发送棋盘信息，后者绘制.
+
+---
+
+- 主菜单中开始按钮被点击，主菜单关闭，`client` 连接到 `server` ，进入游戏界面，游戏开始.
+
+- `MainWindow` 中的 `socket` 从服务器端接受棋盘信息，将其转发给 `QtBoard` ，进行初次绘制.
+
+- `QtBoard` 监测用户的鼠标位置，实现濒死提示. （`QtBoard` 是 `MainWindow` 窗口的一个控件）
+
+- `QtBoard` 上的一个棋子被点击，`QtBoard` 向 `MainWindow` 发送 `movable` 与 `eatable` 请求. 其中 `movable` 是指可移动位置的列表，`eatable` 是指可吃子的列表和配套的吃子路径，这一部分将由服务器端的算法计算.
+
+- `MainWindow` 将请求转发到服务器端，服务器端通过算法计算 `movable` 和 `eatable` 并返回给 `MainWindow` , `MainWindow` 将数据转发给 `QtBoard` .
+
+- `QtBoard` 在收到数据后存储在自己的类中，并且显示高亮（可吃与可移动），在点击后依据收到的路径绘制动画.
+
+- `QtBoard` 监测到用户的第二次点击操作，向 `MainWindow` 发送移动的棋子位置即 `MoveInfo` .
+
+- `MainWindow` 将这个 `Move` 转发给服务器端.
+
+- 服务器端为这个玩家进行一次 `Move` ，将新的棋盘回传给 `MainWindow` ，`MainWindow` 转发给 `QtBoard` 来更新棋盘.
+
+- 在勾选 `AI托管` 后，`MainWindow` 向服务器端发送 `AI托管` 申请，服务器端则在下一个游戏循环使用 `agent` 作为该玩家的移动.
+
+- 在取消勾选 `AI托管` 后，`MainWindow` 向服务器端发送 `取消AI托管` 申请，服务器端则在下一个游戏循环接受 `Move` 作为该玩家的移动.
+
+- 在自己的轮次，点击 `再来一局` 后，`MainWindow` 向服务器发送 `再来一局` 申请，服务器端则重新开始游戏循环.
+
+- 服务器端维护计时器，每秒向两个 `client` 同步时间，同时监测该步是否超时.
+
+- 服务器端同时向自己的小棋盘发送棋盘更新，从而实现服务器端 `GUI` .
+
+### 总结
+
+从设计中可以看出，我们的 `client` 不要求对 Surakarta 规则有**任何**了解，仅起到一个前端的作用. 通过自定义协议的传输，我们得以实现这一点，从而 `client` 事实上只是一个绘图引擎. `server` 端依据其维护的游戏循环向双方不断沟通信息.
+
+### AI 算法
+
+这里我们通过贪心算法来实现 AI . 具体来说，我们通过某种策略计算了估价函数 $f$ ，对所有合法的移动与旋吃进行估价，使用优先队列取出最好的一种移动来作为计算结果. $f$ 的具体信息详见代码.
 
 ## 游戏功能完成情况
 
-我们**准时**完成了**所有**基本开发任务与报告提交. 举例来说，我们在 `5.20` 准时提交了程序到网盘，并提交了 `report3` ，同时验收通过了**全部阶段**. 具体来说：
+我们**准时**完成了**所有**基本开发任务与报告提交. 举例来说，我们在 `5.20` 准时提交了程序到网盘，提交了 `report3` ，同时验收通过了**全部阶段**. 具体来说：
 
 1. `Stage 1` 中我们完成了**要求的**如下内容：
 
@@ -144,7 +204,7 @@
 
 - 2024-05-13 完成了第一版棋子移动动画. 【王燚】
 
-- 2024-05-13 向服务器端添加了 UI 界面，修复内存泄露 【孙浩翔】
+- 2024-05-13 向服务器端添加了 UI 界面，修复内存泄露. 【孙浩翔】
 
 - 2024-05-15 完成了动画，包括旋吃、移动、路径高亮. 【孙浩翔】
 
@@ -160,6 +220,8 @@
 - 2024-05-20 **按时完成了 `Stage 3` 验收**. 【孙浩翔】
 
 - 2024-05-22 完成了日志系统，完成了回放引擎. 【孙浩翔】
+
+具体贡献请见 `GitHub Insights` .
 
 ## 设计亮点
 
@@ -229,7 +291,15 @@ X. STL 的充分使用，通过使用 STL 自带的优先队列，简化了代�
 
 XI. 显式类型转换，在各种运算中，不可避免地要出现 `unsigned int` 加 1 减 1 之类的情况. 我们通过 `static_cast` 进行显式类型转换，防止 `unsigned int` 出现溢出，更加安全.
 
-XII. 合理的分工，并没有出现某个组员贡献很少的情况.
+## 程序发布
+
+我们将打包好的程序发布在 [Surakarta-server-v1.0](https://github.com/CoderBak/Surakarta-server/releases/tag/v1.0) 和 [Surakarta-client-v1.0](https://github.com/CoderBak/Surakarta-client/releases/tag/v1.0) .
+
+目前已知的问题：关闭 `server` 窗口后进程并没有退出，需要手动结束才能重新启动 `server` .
+
+已经在 Windows 平台测试过功能，具体如下：
+
+![](imgs/fig5.png)
 
 ## 附录：提交的压缩包中的剩余代码说明
 
